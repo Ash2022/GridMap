@@ -1,0 +1,386 @@
+[
+  {
+    "partName": "Straight",
+    "gridWidth": 1,
+    "gridHeight": 1,
+    "displaySprite": "Sprites/Track_Straight.png",
+    "connections": [
+      {
+        "id": 0,
+        "direction": 0,
+        "gridOffset": [
+          0,
+          0
+        ]
+      },
+      {
+        "id": 1,
+        "direction": 2,
+        "gridOffset": [
+          0,
+          0
+        ]
+      }
+    ],
+	"allowedPaths": [
+	  {
+		"connections": [
+		  { "entryConnectionId": 0, "exitConnectionId": 1 }, // Up -> Down
+		  { "entryConnectionId": 1, "exitConnectionId": 0 }  // Down -> Up
+		]
+	  }
+	],
+	"originalSplineTemplates": [
+	  [
+		[0.5, 0.0],
+		[0.5, 1.0]
+	  ]
+	],
+	"splineTemplates": [
+	  [
+		[0.5, 0.0],
+		[0.5, 1.0]
+	  ]
+	]
+  },
+  {
+    "partName": "CurveRight",
+    "gridWidth": 1,
+    "gridHeight": 1,
+    "displaySprite": "Sprites/Track_CurveRight.png",
+    "connections": [
+      {
+        "id": 0,
+        "direction": 2,
+        "gridOffset": [
+          0,
+          0
+        ]
+      },
+      {
+        "id": 1,
+        "direction": 1,
+        "gridOffset": [
+          0,
+          0
+        ]
+      }
+    ],
+    "allowedPaths": [
+	  {
+		"connections": [
+		  { "entryConnectionId": 0, "exitConnectionId": 1 }, // Down -> Right
+		  { "entryConnectionId": 1, "exitConnectionId": 0 }  // Right -> Down
+		]
+	  }
+	],
+	"originalSplineTemplates": [
+	  [
+		[0.5, 1.0],
+		[1.0, 0.5]
+	  ]
+	],
+	"splineTemplates": [
+	  [
+		[0.5, 1.0],
+		[1.0, 0.5]
+	  ]
+	]
+  },
+  {
+    "partName": "XCrossing",
+    "gridWidth": 1,
+    "gridHeight": 1,
+    "displaySprite": "Sprites/Track_XCrossing.png",
+    "connections": [
+      {
+        "id": 0,
+        "direction": 0,
+        "gridOffset": [
+          0,
+          0
+        ]
+      },
+      {
+        "id": 1,
+        "direction": 1,
+        "gridOffset": [
+          0,
+          0
+        ]
+      },
+      {
+        "id": 2,
+        "direction": 2,
+        "gridOffset": [
+          0,
+          0
+        ]
+      },
+      {
+        "id": 3,
+        "direction": 3,
+        "gridOffset": [
+          0,
+          0
+        ]
+      }
+    ],
+		"allowedPaths": [
+	  {
+		"connections": [
+		  { "entryConnectionId": 0, "exitConnectionId": 2 }, // Up -> Down
+		  { "entryConnectionId": 2, "exitConnectionId": 0 }  // Down -> Up
+		]
+	  },
+	  {
+		"connections": [
+		  { "entryConnectionId": 1, "exitConnectionId": 3 }, // Right -> Left
+		  { "entryConnectionId": 3, "exitConnectionId": 1 }  // Left -> Right
+		]
+	  }
+	],
+	"originalSplineTemplates": [
+	  [
+		[0.5, 0.0],
+		[0.5, 1.0]
+	  ],
+	  [
+		[1.0, 0.5],
+		[0.0, 0.5]
+	  ]
+	],
+	"splineTemplates": [
+	  [
+		[0.5, 0.0],
+		[0.5, 1.0]
+	  ],
+	  [
+		[1.0, 0.5],
+		[0.0, 0.5]
+	  ]
+	]
+  },
+  {
+    "partName": "CurveRight2x2",
+    "gridWidth": 2,
+    "gridHeight": 2,
+    "displaySprite": "Sprites/Track_CurveRight2x2.png",
+    "connections": [
+      {
+        "id": 0,
+        "direction": 2,
+        "gridOffset": [
+          0,
+          1
+        ]
+      },
+      {
+        "id": 1,
+        "direction": 1,
+        "gridOffset": [
+          1,
+          0
+        ]
+      }
+    ],
+		"allowedPaths": [
+	  {
+		"connections": [
+		  { "entryConnectionId": 0, "exitConnectionId": 1 }, // Down -> Right
+		  { "entryConnectionId": 1, "exitConnectionId": 0 }  // Right -> Down
+		]
+	  }
+	],
+	"originalSplineTemplates": [
+	  [
+		[0.5, 2.0],
+		[0.828125, 0.890625],
+		[2.0, 0.5]
+	  ]
+	],
+	"splineTemplates": [
+	  [
+		[0.5, 2.0],
+		[0.828125, 0.890625],
+		[2.0, 0.5]
+	  ]
+	]
+  },
+  {
+    "partName": "ThreeWay",
+    "gridWidth": 1,
+    "gridHeight": 2,
+    "displaySprite": "Sprites/Track_ThreeWay.png",
+    "connections": [
+      {
+        "id": 0,
+        "direction": 2,
+        "gridOffset": [
+          0,
+          1
+        ]
+      },
+      {
+        "id": 1,
+        "direction": 0,
+        "gridOffset": [
+          0,
+          0
+        ]
+      },
+      {
+        "id": 2,
+        "direction": 1,
+        "gridOffset": [
+          0,
+          0
+        ]
+      }
+    ],
+		"allowedPaths": [
+	  {
+		"connections": [
+		  { "entryConnectionId": 1, "exitConnectionId": 0 }, // Up -> Down
+		  { "entryConnectionId": 0, "exitConnectionId": 1 }  // Down -> Up
+		]
+	  },
+	  {
+		"connections": [
+		  { "entryConnectionId": 2, "exitConnectionId": 0 }, // Right -> Down
+		  { "entryConnectionId": 0, "exitConnectionId": 2 }  // Down -> Right
+		]
+	  }
+	],
+	"originalSplineTemplates": [
+	  [
+		[0.5, 0.0],
+		[0.5, 2.0]
+	  ],
+	  [
+		[1.0, 0.5],
+		[0.5, 2.0]
+	  ]
+	],
+	"splineTemplates": [
+	  [
+		[0.5, 0.0],
+		[0.5, 2.0]
+	  ],
+	  [
+		[1.0, 0.5],
+		[0.5, 2.0]
+	  ]
+	]
+  },
+  {
+    "partName": "ThreeWay2x2",
+    "gridWidth": 2,
+    "gridHeight": 2,
+    "displaySprite": "Sprites/Track_ThreeWay2x2.png",
+    "connections": [
+      {
+        "id": 0,
+        "direction": 0,
+        "gridOffset": [
+          0,
+          0
+        ]
+      },
+      {
+        "id": 1,
+        "direction": 2,
+        "gridOffset": [
+          0,
+          1
+        ]
+      },
+      {
+        "id": 2,
+        "direction": 0,
+        "gridOffset": [
+          1,
+          0
+        ]
+      }
+    ],
+		"allowedPaths": [
+	  {
+		"connections": [
+		  { "entryConnectionId": 0, "exitConnectionId": 1 }, // Top left -> Bottom left
+		  { "entryConnectionId": 1, "exitConnectionId": 0 }  // Bottom left -> Top left
+		]
+	  },
+	  {
+		"connections": [
+		  { "entryConnectionId": 2, "exitConnectionId": 1 }, // Top right -> Bottom left
+		  { "entryConnectionId": 1, "exitConnectionId": 2 }  // Bottom left -> Top right
+		]
+	  }
+	],
+	"originalSplineTemplates": [
+	  [
+		[0.5, 0.0],
+		[0.5, 2.0]
+	  ],
+	  [
+		[1.5, 0.0],
+		[0.5, 2.0]
+	  ]
+	],
+	"splineTemplates": [
+	  [
+		[0.5, 0.0],
+		[0.5, 2.0]
+	  ],
+	  [
+		[1.5, 0.0],
+		[0.5, 2.0]
+	  ]
+	]
+  },
+  {
+    "partName": "LargeCurveRight3x2",
+    "gridWidth": 3,
+    "gridHeight": 2,
+    "displaySprite": "Sprites/Track_LargeCurveRight3x2.png",
+    "connections": [
+      {
+        "id": 0,
+        "direction": 2,
+        "gridOffset": [
+          0,
+          1
+        ]
+      },
+      {
+        "id": 1,
+        "direction": 1,
+        "gridOffset": [
+          2,
+          0
+        ]
+      }
+    ],
+		"allowedPaths": [
+	  {
+		"connections": [
+		  { "entryConnectionId": 0, "exitConnectionId": 1 }, // Bottom -> Right
+		  { "entryConnectionId": 1, "exitConnectionId": 0 }  // Right -> Bottom
+		]
+	  }
+	],
+	"originalSplineTemplates": [
+	  [
+		[0.5, 2.0],
+		[3.0, 0.5]
+	  ]
+	],
+	"splineTemplates": [
+	  [
+		[0.5, 2.0],
+		[3.0, 0.5]
+	  ]
+	]
+  }
+]

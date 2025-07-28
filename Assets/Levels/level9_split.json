@@ -1,0 +1,125 @@
+{
+  "levelName": null,
+  "width": 0,
+  "height": 0,
+  "parts": [
+    {
+      "partType": "ThreeWay",
+      "partId": "ThreeWay_1",
+      "position": {
+        "x": 1,
+        "y": 3,
+        "magnitude": 3.1622777,
+        "sqrMagnitude": 10
+      },
+      "rotation": 0,
+      "splines": []
+    },
+    {
+      "partType": "Straight",
+      "partId": "Straight_2",
+      "position": {
+        "x": 1,
+        "y": 2,
+        "magnitude": 2.236068,
+        "sqrMagnitude": 5
+      },
+      "rotation": 0,
+      "splines": []
+    },
+    {
+      "partType": "Straight",
+      "partId": "Straight_3",
+      "position": {
+        "x": 1,
+        "y": 5,
+        "magnitude": 5.09901953,
+        "sqrMagnitude": 26
+      },
+      "rotation": 0,
+      "splines": []
+    },
+    {
+      "partType": "Straight",
+      "partId": "Straight_4",
+      "position": {
+        "x": 2,
+        "y": 3,
+        "magnitude": 3.60555124,
+        "sqrMagnitude": 13
+      },
+      "rotation": 90,
+      "splines": []
+    }
+  ],
+  "gameData": {
+    "points": [
+      {
+        "gridX": 1,
+        "gridY": 2,
+        "type": 0,
+        "part": {
+          "partType": "Straight",
+          "partId": "Straight_2",
+          "position": {
+            "x": 1,
+            "y": 2,
+            "magnitude": 2.236068,
+            "sqrMagnitude": 5
+          },
+          "rotation": 0,
+          "splines": []
+        },
+        "colorIndex": 0,
+        "id": 9,
+        "waitingPeople": [],
+        "Letter": "S",
+        "HasWaitingPeople": false
+      },
+      {
+        "gridX": 1,
+        "gridY": 5,
+        "type": 0,
+        "part": {
+          "partType": "Straight",
+          "partId": "Straight_3",
+          "position": {
+            "x": 1,
+            "y": 5,
+            "magnitude": 5.09901953,
+            "sqrMagnitude": 26
+          },
+          "rotation": 0,
+          "splines": []
+        },
+        "colorIndex": 0,
+        "id": 10,
+        "waitingPeople": [],
+        "Letter": "S",
+        "HasWaitingPeople": false
+      },
+      {
+        "gridX": 2,
+        "gridY": 3,
+        "type": 0,
+        "part": {
+          "partType": "Straight",
+          "partId": "Straight_4",
+          "position": {
+            "x": 2,
+            "y": 3,
+            "magnitude": 3.60555124,
+            "sqrMagnitude": 13
+          },
+          "rotation": 90,
+          "splines": []
+        },
+        "colorIndex": 0,
+        "id": 11,
+        "waitingPeople": [],
+        "Letter": "S",
+        "HasWaitingPeople": false
+      }
+    ]
+  }
+}

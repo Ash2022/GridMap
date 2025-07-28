@@ -1,0 +1,115 @@
+{
+  "levelName": null,
+  "width": 0,
+  "height": 0,
+  "parts": [
+    {
+      "partType": "Straight",
+      "partId": "Straight_1",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "magnitude": 0.0,
+        "sqrMagnitude": 0
+      },
+      "rotation": 180,
+      "splines": [
+        [
+          {
+            "x": 0.5,
+            "y": 0.0
+          },
+          {
+            "x": 0.5,
+            "y": 1.0
+          }
+        ]
+      ],
+      "exits": [
+        {
+          "exitIndex": 0,
+          "localCell": {
+            "x": 0,
+            "y": 0,
+            "magnitude": 0.0,
+            "sqrMagnitude": 0
+          },
+          "rotatedCell": {
+            "x": 0,
+            "y": 0,
+            "magnitude": 0.0,
+            "sqrMagnitude": 0
+          },
+          "worldCell": {
+            "x": 0,
+            "y": 0,
+            "magnitude": 0.0,
+            "sqrMagnitude": 0
+          },
+          "direction": 2,
+          "neighborCell": {
+            "x": 0,
+            "y": 1,
+            "magnitude": 1.0,
+            "sqrMagnitude": 1
+          }
+        },
+        {
+          "exitIndex": 1,
+          "localCell": {
+            "x": 0,
+            "y": 0,
+            "magnitude": 0.0,
+            "sqrMagnitude": 0
+          },
+          "rotatedCell": {
+            "x": 0,
+            "y": 0,
+            "magnitude": 0.0,
+            "sqrMagnitude": 0
+          },
+          "worldCell": {
+            "x": 0,
+            "y": 0,
+            "magnitude": 0.0,
+            "sqrMagnitude": 0
+          },
+          "direction": 0,
+          "neighborCell": {
+            "x": 0,
+            "y": -1,
+            "magnitude": 1.0,
+            "sqrMagnitude": 1
+          }
+        }
+      ],
+      "occupyingCells": [
+        {
+          "x": 0,
+          "y": 0,
+          "magnitude": 0.0,
+          "sqrMagnitude": 0
+        }
+      ],
+      "allowedPathsGroup": [
+        {
+          "allowedPaths": [
+            {
+              "entryConnectionId": 0,
+              "exitConnectionId": 1,
+              "length": 1.0
+            },
+            {
+              "entryConnectionId": 1,
+              "exitConnectionId": 0,
+              "length": 1.0
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "gameData": {
+    "points": []
+  }
+}

@@ -1,0 +1,117 @@
+[
+  {
+    "partName": "Straight",
+    "trackType": "Straight",
+    "gridWidth": 1,
+    "gridHeight": 1,
+    "displaySprite": "Sprites/Track_Straight.png",
+    "connections": [
+      { "id": 0, "direction": 0, "gridOffset": [0, 0] }, // Up
+      { "id": 1, "direction": 2, "gridOffset": [0, 0] }  // Down
+    ],
+    "allowedPaths": [
+      { "entryConnectionId": 0, "exitConnectionId": 1 }, // Up -> Down
+      { "entryConnectionId": 1, "exitConnectionId": 0 }  // Down -> Up
+    ]
+  },
+  {
+    "partName": "CurveRight",
+    "trackType": "Curve",
+    "gridWidth": 1,
+    "gridHeight": 1,
+    "displaySprite": "Sprites/Track_CurveRight.png", // ![image1](image1)
+    "connections": [
+      { "id": 0, "direction": 2, "gridOffset": [0, 0] }, // Down
+      { "id": 1, "direction": 1, "gridOffset": [0, 0] }  // Right
+    ],
+    "allowedPaths": [
+      { "entryConnectionId": 0, "exitConnectionId": 1 }, // Down -> Right
+      { "entryConnectionId": 1, "exitConnectionId": 0 }  // Right -> Down
+    ]
+  },
+  {
+    "partName": "XCrossing",
+    "trackType": "Crossing",
+    "gridWidth": 1,
+    "gridHeight": 1,
+    "displaySprite": "Sprites/Track_XCrossing.png", // ![image2](image2)
+    "connections": [
+      { "id": 0, "direction": 0, "gridOffset": [0, 0] }, // Up
+      { "id": 1, "direction": 1, "gridOffset": [0, 0] }, // Right
+      { "id": 2, "direction": 2, "gridOffset": [0, 0] }, // Down
+      { "id": 3, "direction": 3, "gridOffset": [0, 0] }  // Left
+    ],
+    "allowedPaths": [
+      { "entryConnectionId": 0, "exitConnectionId": 2 }, // Up -> Down
+      { "entryConnectionId": 2, "exitConnectionId": 0 }, // Down -> Up
+      { "entryConnectionId": 1, "exitConnectionId": 3 }, // Right -> Left
+      { "entryConnectionId": 3, "exitConnectionId": 1 }  // Left -> Right
+    ]
+  },
+  {
+    "partName": "CurveRight2x2",
+    "trackType": "Curve",
+    "gridWidth": 2,
+    "gridHeight": 2,
+    "displaySprite": "Sprites/Track_CurveRight2x2.png", // ![image3](image3)
+    "connections": [
+      { "id": 0, "direction": 2, "gridOffset": [0, 1] }, // Down (bottom left)
+      { "id": 1, "direction": 1, "gridOffset": [1, 0] }  // Right (top right)
+    ],
+    "allowedPaths": [
+      { "entryConnectionId": 0, "exitConnectionId": 1 }, // Down -> Right
+      { "entryConnectionId": 1, "exitConnectionId": 0 }  // Right -> Down
+    ]
+  },
+  {
+    "partName": "ThreeWay",
+    "trackType": "Junction",
+    "gridWidth": 1,
+    "gridHeight": 2,
+    "displaySprite": "Sprites/Track_ThreeWay.png", // ![image4](image4)
+    "connections": [
+      { "id": 0, "direction": 2, "gridOffset": [0, 1] }, // Down (bottom)
+      { "id": 1, "direction": 0, "gridOffset": [0, 0] }, // Up (top)
+      { "id": 2, "direction": 1, "gridOffset": [0, 0] }  // Right (right)
+    ],
+    "allowedPaths": [
+      { "entryConnectionId": 1, "exitConnectionId": 0 }, // Up -> Down
+      { "entryConnectionId": 0, "exitConnectionId": 1 }, // Down -> Up
+      { "entryConnectionId": 2, "exitConnectionId": 0 }, // Right -> Down
+      { "entryConnectionId": 0, "exitConnectionId": 2 }  // Down -> Right
+    ]
+  },
+  {
+  "partName": "ThreeWay2x2",
+  "trackType": "Junction",
+  "gridWidth": 2,
+  "gridHeight": 2,
+  "displaySprite": "Sprites/Track_ThreeWay2x2.png",
+  "connections": [
+    { "id": 0, "direction": 0, "gridOffset": [0, 0] }, // Top left
+    { "id": 1, "direction": 2, "gridOffset": [0, 1] }, // Bottom left
+    { "id": 2, "direction": 0, "gridOffset": [1, 0] }  // Top right
+  ],
+  "allowedPaths": [
+    { "entryConnectionId": 0, "exitConnectionId": 1 }, // Top left <-> Bottom left
+    { "entryConnectionId": 1, "exitConnectionId": 0 },
+    { "entryConnectionId": 2, "exitConnectionId": 1 }, // Top right <-> Bottom left
+    { "entryConnectionId": 1, "exitConnectionId": 2 }
+  ]
+},
+{
+  "partName": "LargeCurveRight3x2",
+  "trackType": "Curve",
+  "gridWidth": 3,
+  "gridHeight": 2,
+  "displaySprite": "Sprites/Track_LargeCurveRight3x2.png", // ![image6](image6)
+  "connections": [
+    { "id": 0, "direction": 2, "gridOffset": [0, 1] }, // Bottom (leftmost)
+    { "id": 1, "direction": 1, "gridOffset": [2, 0] }  // Right (top right)
+  ],
+  "allowedPaths": [
+    { "entryConnectionId": 0, "exitConnectionId": 1 }, // Bottom -> Right
+    { "entryConnectionId": 1, "exitConnectionId": 0 }  // Right -> Bottom
+  ]
+}
+]

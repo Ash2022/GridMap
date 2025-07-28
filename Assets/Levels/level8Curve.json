@@ -1,0 +1,163 @@
+{
+  "levelName": null,
+  "width": 0,
+  "height": 0,
+  "parts": [
+    {
+      "partType": "CurveRight",
+      "partId": "CurveRight_1",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "magnitude": 0.0,
+        "sqrMagnitude": 0
+      },
+      "rotation": 0,
+      "splines": []
+    },
+    {
+      "partType": "Straight",
+      "partId": "Straight_2",
+      "position": {
+        "x": 0,
+        "y": 1,
+        "magnitude": 1.0,
+        "sqrMagnitude": 1
+      },
+      "rotation": 0,
+      "splines": []
+    },
+    {
+      "partType": "Straight",
+      "partId": "Straight_3",
+      "position": {
+        "x": 0,
+        "y": 2,
+        "magnitude": 2.0,
+        "sqrMagnitude": 4
+      },
+      "rotation": 0,
+      "splines": []
+    },
+    {
+      "partType": "Straight",
+      "partId": "Straight_4",
+      "position": {
+        "x": 0,
+        "y": 3,
+        "magnitude": 3.0,
+        "sqrMagnitude": 9
+      },
+      "rotation": 0,
+      "splines": []
+    },
+    {
+      "partType": "Straight",
+      "partId": "Straight_5",
+      "position": {
+        "x": 0,
+        "y": 4,
+        "magnitude": 4.0,
+        "sqrMagnitude": 16
+      },
+      "rotation": 0,
+      "splines": []
+    },
+    {
+      "partType": "Straight",
+      "partId": "Straight_6",
+      "position": {
+        "x": 1,
+        "y": 0,
+        "magnitude": 1.0,
+        "sqrMagnitude": 1
+      },
+      "rotation": 90,
+      "splines": []
+    },
+    {
+      "partType": "Straight",
+      "partId": "Straight_7",
+      "position": {
+        "x": 2,
+        "y": 0,
+        "magnitude": 2.0,
+        "sqrMagnitude": 4
+      },
+      "rotation": 90,
+      "splines": []
+    },
+    {
+      "partType": "Straight",
+      "partId": "Straight_8",
+      "position": {
+        "x": 3,
+        "y": 0,
+        "magnitude": 3.0,
+        "sqrMagnitude": 9
+      },
+      "rotation": 90,
+      "splines": []
+    },
+    {
+      "partType": "Straight",
+      "partId": "Straight_9",
+      "position": {
+        "x": 4,
+        "y": 0,
+        "magnitude": 4.0,
+        "sqrMagnitude": 16
+      },
+      "rotation": 90,
+      "splines": []
+    }
+  ],
+  "gameData": {
+    "points": [
+      {
+        "gridX": 0,
+        "gridY": 4,
+        "type": 0,
+        "part": {
+          "partType": "Straight",
+          "partId": "Straight_5",
+          "position": {
+            "x": 0,
+            "y": 4,
+            "magnitude": 4.0,
+            "sqrMagnitude": 16
+          },
+          "rotation": 0,
+          "splines": []
+        },
+        "colorIndex": 0,
+        "id": 5,
+        "waitingPeople": [],
+        "Letter": "S",
+        "HasWaitingPeople": false
+      },
+      {
+        "gridX": 4,
+        "gridY": 0,
+        "type": 0,
+        "part": {
+          "partType": "Straight",
+          "partId": "Straight_9",
+          "position": {
+            "x": 4,
+            "y": 0,
+            "magnitude": 4.0,
+            "sqrMagnitude": 16
+          },
+          "rotation": 90,
+          "splines": []
+        },
+        "colorIndex": 0,
+        "id": 6,
+        "waitingPeople": [],
+        "Letter": "S",
+        "HasWaitingPeople": false
+      }
+    ]
+  }
+}

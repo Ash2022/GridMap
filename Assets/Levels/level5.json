@@ -1,0 +1,127 @@
+{
+  "levelName": null,
+  "width": 0,
+  "height": 0,
+  "parts": [
+    {
+      "partType": "CurveRight",
+      "partId": "CurveRight_1",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "magnitude": 0.0,
+        "sqrMagnitude": 0
+      },
+      "rotation": 0,
+      "splines": []
+    },
+    {
+      "partType": "Straight",
+      "partId": "Straight_2",
+      "position": {
+        "x": 0,
+        "y": 1,
+        "magnitude": 1.0,
+        "sqrMagnitude": 1
+      },
+      "rotation": 0,
+      "splines": []
+    },
+    {
+      "partType": "Straight",
+      "partId": "Straight_3",
+      "position": {
+        "x": 1,
+        "y": 0,
+        "magnitude": 1.0,
+        "sqrMagnitude": 1
+      },
+      "rotation": 90,
+      "splines": []
+    },
+    {
+      "partType": "Straight",
+      "partId": "Straight_4",
+      "position": {
+        "x": 2,
+        "y": 1,
+        "magnitude": 2.236068,
+        "sqrMagnitude": 5
+      },
+      "rotation": 0,
+      "splines": []
+    },
+    {
+      "partType": "Straight",
+      "partId": "Straight_5",
+      "position": {
+        "x": 1,
+        "y": 2,
+        "magnitude": 2.236068,
+        "sqrMagnitude": 5
+      },
+      "rotation": 90,
+      "splines": []
+    },
+    {
+      "partType": "CurveRight",
+      "partId": "CurveRight_6",
+      "position": {
+        "x": 2,
+        "y": 0,
+        "magnitude": 2.0,
+        "sqrMagnitude": 4
+      },
+      "rotation": 90,
+      "splines": []
+    },
+    {
+      "partType": "CurveRight",
+      "partId": "CurveRight_7",
+      "position": {
+        "x": 2,
+        "y": 2,
+        "magnitude": 2.828427,
+        "sqrMagnitude": 8
+      },
+      "rotation": 180,
+      "splines": []
+    },
+    {
+      "partType": "CurveRight",
+      "partId": "CurveRight_8",
+      "position": {
+        "x": 0,
+        "y": 2,
+        "magnitude": 2.0,
+        "sqrMagnitude": 4
+      },
+      "rotation": 270,
+      "splines": []
+    }
+  ],
+  "gameData": {
+    "points": [
+      {
+        "gridX": 0,
+        "gridY": 1,
+        "type": 0,
+        "colorIndex": 0,
+        "id": 1,
+        "waitingPeople": [],
+        "Letter": "S",
+        "HasWaitingPeople": false
+      },
+      {
+        "gridX": 2,
+        "gridY": 1,
+        "type": 0,
+        "colorIndex": 0,
+        "id": 2,
+        "waitingPeople": [],
+        "Letter": "S",
+        "HasWaitingPeople": false
+      }
+    ]
+  }
+}

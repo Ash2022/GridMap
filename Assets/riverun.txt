@@ -1,0 +1,13 @@
+Do we need easing or “fade?in” of each tile?
+
+How long per tile delay looks good? (e.g. 0.05s?)
+
+Camera setup: will you use an orthographic camera sized exactly to 9:16, or simply parent everything under a Canvas?
+
+Prefab lookup: you could expose a small List<PartPrefab> in the inspector or build a runtime Dictionary<string, Sprite> from a Resources folder.
+
+
+1. Not at the moment.
+2. you can put for now 0.05
+3. everything will be in 3D - i cant make a train turn in 2D - so it wont be in canvas it will be in scene - you can add a MainHolder Transform searializedField and put all in there
+4. not sure we need a list - just a single Prefab PartPrefab - that will have TrackPartView and can be inited to any of the shapes we have in dict.

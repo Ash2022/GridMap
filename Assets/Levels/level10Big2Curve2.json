@@ -1,0 +1,91 @@
+{
+  "levelName": null,
+  "width": 0,
+  "height": 0,
+  "parts": [
+    {
+      "partType": "LargeCurveRight3x2",
+      "partId": "LargeCurveRight3x2_1",
+      "position": {
+        "x": 2,
+        "y": 3,
+        "magnitude": 3.60555124,
+        "sqrMagnitude": 13
+      },
+      "rotation": 0,
+      "splines": []
+    },
+    {
+      "partType": "Straight",
+      "partId": "Straight_2",
+      "position": {
+        "x": 2,
+        "y": 5,
+        "magnitude": 5.38516474,
+        "sqrMagnitude": 29
+      },
+      "rotation": 0,
+      "splines": []
+    },
+    {
+      "partType": "Straight",
+      "partId": "Straight_3",
+      "position": {
+        "x": 5,
+        "y": 3,
+        "magnitude": 5.83095169,
+        "sqrMagnitude": 34
+      },
+      "rotation": 90,
+      "splines": []
+    }
+  ],
+  "gameData": {
+    "points": [
+      {
+        "gridX": 5,
+        "gridY": 3,
+        "type": 0,
+        "part": {
+          "partType": "Straight",
+          "partId": "Straight_3",
+          "position": {
+            "x": 5,
+            "y": 3,
+            "magnitude": 5.83095169,
+            "sqrMagnitude": 34
+          },
+          "rotation": 90,
+          "splines": []
+        },
+        "colorIndex": 0,
+        "id": 39,
+        "waitingPeople": [],
+        "Letter": "S",
+        "HasWaitingPeople": false
+      },
+      {
+        "gridX": 2,
+        "gridY": 5,
+        "type": 0,
+        "part": {
+          "partType": "Straight",
+          "partId": "Straight_2",
+          "position": {
+            "x": 2,
+            "y": 5,
+            "magnitude": 5.38516474,
+            "sqrMagnitude": 29
+          },
+          "rotation": 0,
+          "splines": []
+        },
+        "colorIndex": 0,
+        "id": 40,
+        "waitingPeople": [],
+        "Letter": "S",
+        "HasWaitingPeople": false
+      }
+    ]
+  }
+}
