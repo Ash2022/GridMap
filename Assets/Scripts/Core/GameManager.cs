@@ -1,3 +1,5 @@
+﻿using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -6,7 +8,8 @@ public class GameManager : MonoBehaviour
 
     [Tooltip("Drag your LevelData asset or fill at runtime.")]
     public LevelData level;
-
+    private GamePoint _lastTarget;
+    private PathModel _lastPath;
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -38,11 +41,9 @@ public class GameManager : MonoBehaviour
 
     private void OnStationClicked(StationView stationView)
     {
-        // grab the model
-        GamePoint target = stationView.GetComponent<StationView>()
-                                      .GetType()
-                                      .GetField("_pointModel", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                                      ?.GetValue(stationView) as GamePoint;
+        var target = stationView.GetType()
+                                .GetField("_pointModel", BindingFlags.NonPublic | BindingFlags.Instance)
+                                ?.GetValue(stationView) as GamePoint;
 
         if (target == null)
         {
@@ -50,7 +51,22 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        // Find the path from the first train to this station:
+        // Second click on same station → move the train
+        if (_lastTarget == target && _lastPath?.Success == true)
+        {
+            Debug.Log("Second click: moving train");
+
+            var worldPoints = LevelVisualizer.Instance.ExtractWorldPointsFromPath(_lastPath);
+
+            LevelVisualizer.Instance.trainMover.MoveAlongPath(worldPoints);
+
+            // Reset to avoid re-triggering movement repeatedly
+            _lastTarget = null;
+            _lastPath = null;
+            return;
+        }
+
+        // First click → compute path
         PathModel path = PathService.FindPathTo(level, target);
 
         if (!path.Success)
@@ -59,10 +75,12 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        // TODO: hand the PathModel to whatever system moves your train.
         Debug.Log($"Path found with {path.Traversals.Count} steps, cost={path.TotalCost}");
 
-        LevelVisualizer.Instance.DrawGlobalSplinePath(path);
+        LevelVisualizer.Instance.DrawGlobalSplinePath(path, new List<Vector3>());
 
+        // Store for next click
+        _lastTarget = target;
+        _lastPath = path;
     }
 }

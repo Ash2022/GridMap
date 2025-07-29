@@ -35,6 +35,8 @@ public class LevelVisualizer : MonoBehaviour
 
     [SerializeField] LineRenderer globalPathRenderer;
 
+    public TrainMover trainMover;
+
     LevelData currLevel;
 
     public float CellSize { get => cellSize; set => cellSize = value; }
@@ -288,6 +290,8 @@ public class LevelVisualizer : MonoBehaviour
             };
             trainGO.transform.rotation = Quaternion.Euler(0f, 0f, angleZ);
 
+            trainMover = trainGO.GetComponent<TrainMover>();
+
             float cartSize = cellSize / 3f;
             float gap = cellSize / 10f;
             float headBack = cellSize * 0.5f;
@@ -301,6 +305,8 @@ public class LevelVisualizer : MonoBehaviour
                 float offset = firstOffset + (cartSize + gap) * j;
                 cartGO.transform.position = centerPos + backward * offset;
                 cartGO.transform.rotation = trainGO.transform.rotation;
+
+                
             }
         }
         //DrawGlobalSplinePath(level.parts);
@@ -318,9 +324,9 @@ public class LevelVisualizer : MonoBehaviour
     }
 
 
-    public void DrawGlobalSplinePath(PathModel pathModel)
+    public void DrawGlobalSplinePath(PathModel pathModel,List<Vector3> worldPts)
     {
-        var worldPts = new List<Vector3>();
+        
 
         for (int pi = 0; pi < pathModel.Traversals.Count; pi++)
         {
@@ -391,11 +397,11 @@ public class LevelVisualizer : MonoBehaviour
                 }
                 else
                 {
-                    float te = trav.entryExit < 0 ? 0.5f : GetExitT(inst, trav.entryExit);
-                    float tx = trav.exitExit < 0 ? 0.5f : GetExitT(inst, trav.exitExit);
+                    //float te = trav.entryExit < 0 ? 0.5f : GetExitT(inst, trav.entryExit);
+                    //float tx = trav.exitExit < 0 ? 0.5f : GetExitT(inst, trav.exitExit);
 
-                    t0 = Mathf.Min(te, tx);
-                    t1 = Mathf.Max(te, tx);
+                    t0 = trav.entryExit < 0 ? 0.5f : GetExitT(inst, trav.entryExit);
+                    t1 = trav.exitExit < 0 ? 0.5f : GetExitT(inst, trav.exitExit);
 
                     if (Mathf.Approximately(t0, t1))
                     {
@@ -499,5 +505,11 @@ public class LevelVisualizer : MonoBehaviour
         return outPts;
     }
 
+    public List<Vector3> ExtractWorldPointsFromPath(PathModel pathModel)
+    {
+        var pts = new List<Vector3>();
+        DrawGlobalSplinePath(pathModel, pts);
+        return pts;
+    }
 }
 
