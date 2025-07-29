@@ -16,10 +16,10 @@ public class TrackLevelEditorWindow : EditorWindow
     private List<TrackPart> partsLibrary = new List<TrackPart>();
     private int selectedPartIndex = 0;
 
-    private const int gridWidth = 7;//30;
-    private const int gridHeight = 9;//50;
+    private const int gridWidth = 7*2;//30;
+    private const int gridHeight = 9*2;//50;
 
-    private const int cellSize = 50;//15; // Use this everywhere
+    private const int cellSize = 50/2;//15; // Use this everywhere
 
     private Vector2 gridScroll;
 

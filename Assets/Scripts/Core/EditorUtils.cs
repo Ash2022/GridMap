@@ -267,7 +267,7 @@ namespace EditorUtils
 
             // Draw
             Handles.color = new Color(Color.yellow.r, Color.yellow.g, Color.yellow.b, 0.25f);
-            Handles.DrawAAPolyLine(12f, seg.ToArray());
+            Handles.DrawAAPolyLine(20f, seg.ToArray());
             Handles.DrawSolidDisc(seg[0], Vector3.forward, 4f);
             Handles.DrawSolidDisc(seg[seg.Count - 1], Vector3.forward, 4f);
         }

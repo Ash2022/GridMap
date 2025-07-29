@@ -148,8 +148,5 @@ public class PathModel
         public int entryExit; // where we entered this part
         public int exitExit;  // where we left this part
 
-        public int splineIndex;  // which sub‑spline of this part
-        public float tStart;       // 0..1 along that spline where you began
-        public float tEnd;         // 0..1 along that spline where you left
     }
 }

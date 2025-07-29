@@ -316,7 +316,7 @@ public class LevelVisualizer : MonoBehaviour
         int idx = partsLibrary.FindIndex(p => p.partName == partType);
         return (idx >= 0 && idx < partSprites.Count) ? partSprites[idx] : null;
     }
-    
+
 
     public void DrawGlobalSplinePath(PathModel pathModel)
     {
@@ -328,40 +328,55 @@ public class LevelVisualizer : MonoBehaviour
             var inst = currLevel.parts.First(p => p.partId == trav.partId);
 
             // pick sub‑spline index (forward or reverse)
-            int splineIndex;
+            int splineIndex = -1;
+            int groupIndex = -1;
+            int pathIndex = -1;
+
             if (inst.allowedPathsGroup?.Count > 0 && inst.worldSplines != null)
             {
-                var grp = inst.allowedPathsGroup[0];
-                int idx = grp.allowedPaths.FindIndex(ap =>
-                    (ap.entryConnectionId == trav.entryExit && ap.exitConnectionId == trav.exitExit) ||
-                    (ap.entryConnectionId == trav.exitExit && ap.exitConnectionId == trav.entryExit)
-                );
+                bool found = false;
 
-                if (idx >= 0 && idx < inst.worldSplines.Count)
+                for (int gi = 0; gi < inst.allowedPathsGroup.Count; gi++)
                 {
-                    splineIndex = idx;
+                    var grp = inst.allowedPathsGroup[gi];
+                    int idx = grp.allowedPaths.FindIndex(ap =>
+                        (ap.entryConnectionId == trav.entryExit && ap.exitConnectionId == trav.exitExit) ||
+                        (ap.entryConnectionId == trav.exitExit && ap.exitConnectionId == trav.entryExit)
+                    );
+
+                    if (idx >= 0)
+                    {
+                        if (gi < inst.worldSplines.Count)
+                        {
+                            groupIndex = gi;
+                            pathIndex = idx;
+                            splineIndex = gi; // assuming 1:1 between groupIndex and splineIndex
+                            found = true;
+                            break;
+                        }
+                    }
                 }
-                else if (inst.worldSplines.Count == 1)
+
+                if (!found)
                 {
-                    // only one curve to choose from
-                    splineIndex = 0;
-                }
-                else
-                {
-                    // multi‐exit part and no matching allowedPath → skip drawing this traversal
-                    continue;
+                    if (inst.worldSplines.Count == 1)
+                    {
+                        splineIndex = 0;
+                    }
+                    else
+                    {
+                        continue; // skip drawing this traversal
+                    }
                 }
             }
             else
             {
-                // no allowedPathsGroup → must be a simple part
+                // simple part
                 splineIndex = 0;
             }
 
-            // grab world‑space spline
             var full = inst.worldSplines?[splineIndex] ?? new List<Vector3>();
 
-            // determine tStart/tEnd exactly like editor
             bool simple = inst.exits.Count <= 2;
             bool first = pi == 0;
             bool last = pi == pathModel.Traversals.Count - 1;
@@ -371,24 +386,17 @@ public class LevelVisualizer : MonoBehaviour
             {
                 if (!first && !last)
                 {
-                    // fully draw any simple part in the middle
                     t0 = 0f;
                     t1 = 1f;
                 }
                 else
                 {
-                    // first or last simple part: clamp one side to 0.5, the other to its exit T
-                    float te = trav.entryExit < 0
-                        ? 0.5f
-                        : GetExitT(inst, trav.entryExit);
-                    float tx = trav.exitExit < 0
-                        ? 0.5f
-                        : GetExitT(inst, trav.exitExit);
+                    float te = trav.entryExit < 0 ? 0.5f : GetExitT(inst, trav.entryExit);
+                    float tx = trav.exitExit < 0 ? 0.5f : GetExitT(inst, trav.exitExit);
 
                     t0 = Mathf.Min(te, tx);
                     t1 = Mathf.Max(te, tx);
 
-                    // avoid t0 == t1 (zero‑length)
                     if (Mathf.Approximately(t0, t1))
                     {
                         const float eps = 0.001f;
@@ -399,16 +407,13 @@ public class LevelVisualizer : MonoBehaviour
             }
             else
             {
-                // multi‐exit parts
                 if (last)
                 {
-                    // final part: clamp one end at 0.5, the other at its exit T
                     float tx = trav.exitExit < 0 ? 0.5f : GetExitT(inst, trav.exitExit);
 
                     t0 = Mathf.Min(0.5f, tx);
                     t1 = Mathf.Max(0.5f, tx);
 
-                    // avoid zero‑length
                     if (Mathf.Approximately(t0, t1))
                     {
                         const float eps = 0.001f;
@@ -418,36 +423,32 @@ public class LevelVisualizer : MonoBehaviour
                 }
                 else
                 {
-                    // middle multi-exit parts are full
                     t0 = 0f;
                     t1 = 1f;
                 }
             }
 
-            // extract that segment
             var seg = ExtractSegmentWorld(full, t0, t1);
 
-            // if we came in on the “far” end, reverse the segment so entry→exit is forwards
-            if (inst.allowedPathsGroup?.Count > 0)
+            // reverse if entry is on the far side
+            if (groupIndex >= 0 && pathIndex >= 0)
             {
-                var ap = inst.allowedPathsGroup[0].allowedPaths[splineIndex];
+                var ap = inst.allowedPathsGroup[groupIndex].allowedPaths[pathIndex];
                 if (trav.entryExit != ap.entryConnectionId)
                     seg.Reverse();
             }
 
-            // append, skipping only exact duplicate at join
             foreach (var w in seg)
             {
                 if (worldPts.Count == 0 || worldPts[worldPts.Count - 1] != w)
                     worldPts.Add(w);
             }
-
-
         }
 
         globalPathRenderer.positionCount = worldPts.Count;
         globalPathRenderer.SetPositions(worldPts.ToArray());
     }
+
 
     // maps exitIndex to normalized t along its simple spline
     static float GetExitT(PlacedPartInstance part, int exitIndex)

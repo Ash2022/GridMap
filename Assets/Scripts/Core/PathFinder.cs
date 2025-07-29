@@ -11,9 +11,9 @@ public class PathFinder
     public void Init(RouteModel model) => _model = model;
 
 
-    
 
-    public PathModel GetPath(PlacedPartInstance startPart, PlacedPartInstance endPart)
+
+    public PathModel GetPath(PlacedPartInstance startPart, PlacedPartInstance endPart, int startExitPin = -999)
     {
         var log = new StringBuilder();
         log.AppendLine("=== RoutePathFinder ===");
@@ -74,7 +74,6 @@ public class PathFinder
             {
                 foundGoals.Add((u, best));
                 log.AppendLine($"Reached goal state: {u} cost={best}");
-                // don't break – we might still find cheaper goal states
             }
 
             // expand
@@ -115,22 +114,41 @@ public class PathFinder
             return new PathModel(); // failed
         }
 
+        // filter based on startExitPin if specified
+        if (startExitPin != -999)
+        {
+            foundGoals = foundGoals
+                .Where(g =>
+                {
+                    var edgePath = ReconstructEdgePath(g.s, prev);
+                    return edgePath.Count > 0 && edgePath[0].exitPin == startExitPin;
+                })
+                .ToList();
+
+            if (foundGoals.Count == 0)
+            {
+                log.AppendLine($"No path matched the required startExitPin={startExitPin}.");
+                Debug.Log(log.ToString());
+                return new PathModel(); // failed
+            }
+        }
+
         // pick best goal
         foundGoals.Sort((a, b) => a.c.CompareTo(b.c));
         var goal = foundGoals[0].s;
         float totalCost = foundGoals[0].c;
 
         // reconstruct edge list
-        var edgePath = ReconstructEdgePath(goal, prev);
+        var edgePathFinal = ReconstructEdgePath(goal, prev);
 
-        // dump candidates? (we stored only best)
+        // dump chosen path
         log.AppendLine("=== Chosen path ===");
-        DumpEdges(edgePath, log);
+        DumpEdges(edgePathFinal, log);
         log.AppendLine("TotalCost: " + totalCost);
         Debug.Log(log.ToString());
 
-        // build traversal output like before
-        var traversals = BuildTraversals(edgePath);
+        // build traversal output
+        var traversals = BuildTraversals(edgePathFinal);
 
         return new PathModel
         {
@@ -140,96 +158,7 @@ public class PathFinder
         };
     }
 
-    // ---------- internals ----------
 
-    public PathModel GetDirectedPath(
-        PlacedPartInstance startPart,
-        int startExitPin,
-        PlacedPartInstance endPart,
-        int endEntryPin = -1)
-    {
-        // --- build the single start‐state ---
-        var startState = new RouteModel.State(startPart.partId, startExitPin);
-
-        // goal predicate
-        bool IsGoal(RouteModel.State s)
-            => s.partId == endPart.partId
-               && (endEntryPin < 0 || s.entryPin == endEntryPin);
-
-        // Dijkstra containers
-        var dist = new Dictionary<RouteModel.State, float> { [startState] = 0f };
-        var prev = new Dictionary<RouteModel.State, PrevRec>();
-        var open = new List<RouteModel.State> { startState };
-        var closed = new HashSet<RouteModel.State>();
-        var foundGoals = new List<(RouteModel.State s, float cost)>();
-
-        // --- main loop ---
-        while (open.Count > 0)
-        {
-            // extract‐min
-            float best = float.PositiveInfinity;
-            int bestIdx = 0;
-            for (int i = 0; i < open.Count; i++)
-            {
-                float d = dist[open[i]];
-                if (d < best) { best = d; bestIdx = i; }
-            }
-            var u = open[bestIdx];
-            open.RemoveAt(bestIdx);
-
-            if (!closed.Add(u))
-                continue;
-
-            if (IsGoal(u))
-                foundGoals.Add((u, best));
-
-            // expand neighbors
-            if (!_model.parts.TryGetValue(u.partId, out var pc))
-                continue;
-            if (!pc.allowed.TryGetValue(u.entryPin, out var internals))
-                continue;
-
-            foreach (var edge in internals)
-            {
-                if (!pc.neighborByExit.TryGetValue(edge.exitPin, out var nl))
-                    continue;
-
-                var v = new RouteModel.State(nl.neighborPartId, nl.neighborPin);
-                if (closed.Contains(v))
-                    continue;
-
-                float cost = best + edge.internalLen + nl.externalLen;
-                if (!dist.TryGetValue(v, out var old) || cost < old)
-                {
-                    dist[v] = cost;
-                    prev[v] = new PrevRec { prevState = u, exitPin = edge.exitPin, edgeCost = edge.internalLen + nl.externalLen };
-                    if (!open.Contains(v))
-                        open.Add(v);
-                }
-            }
-        }
-
-        if (foundGoals.Count == 0)
-            return new PathModel { Success = false };
-
-        // pick best goal
-        foundGoals.Sort((a, b) => a.cost.CompareTo(b.cost));
-        var bestGoal = foundGoals[0].s;
-        float totalCost = foundGoals[0].cost;
-
-        // reconstruct
-        var steps = ReconstructEdgePath(bestGoal, prev);
-        var traversals = BuildTraversals(steps);
-
-        return new PathModel
-        {
-            Success = true,
-            TotalCost = totalCost,
-            Traversals = traversals
-        };
-    }
-
-    // (Keep your existing PrevRec, ReconstructEdgePath, BuildTraversals, etc., unchanged.)
 
 private struct PrevRec
     {
@@ -309,59 +238,11 @@ private struct PrevRec
             var pc = _model.parts[curPartId];
             var placed = pc.part;
 
-            // 1) pick the sub‐spline index
-            int splineIndex = 0;
-            if (placed.allowedPathsGroup != null && placed.allowedPathsGroup.Count > 0)
-            {
-                var grp = placed.allowedPathsGroup[0];
-                int idx = grp.allowedPaths.FindIndex(ap =>
-                    ap.entryConnectionId == entryPin &&
-                    ap.exitConnectionId == exitPin);
-                if (idx >= 0 && idx < placed.splines.Count) splineIndex = idx;
-            }
-
-            // 2) compute tStart/tEnd
-            bool simple = placed.exits.Count <= 2;
-            float tStart, tEnd;
-
-            if (simple)
-            {
-                if (entryPin != -1 && exitPin != -1)
-                {
-                    // middle simple part
-                    tStart = 0f;
-                    tEnd = 1f;
-                }
-                else
-                {
-                    // first or last simple part: clamp at center
-                    float te = ExitT(placed, entryPin);
-                    float tx = ExitT(placed, exitPin);
-                    tStart = Mathf.Min(te, tx);
-                    tEnd = Mathf.Max(te, tx);
-                    if (Mathf.Approximately(tStart, tEnd))
-                    {
-                        const float eps = 0.001f;
-                        if (tEnd + eps <= 1f) tEnd += eps;
-                        else tStart = Mathf.Max(0f, tStart - eps);
-                    }
-                }
-            }
-            else
-            {
-                // multi‐exit always full spline
-                tStart = 0f;
-                tEnd = 1f;
-            }
-
             result.Add(new PathModel.PartTraversal
             {
                 partId = curPartId,
                 entryExit = entryPin,
-                exitExit = exitPin,
-                splineIndex = splineIndex,
-                tStart = tStart,
-                tEnd = tEnd
+                exitExit = exitPin                
             });
         }
 
@@ -373,10 +254,7 @@ private struct PrevRec
             {
                 partId = goal.partId,
                 entryExit = goal.entryPin,
-                exitExit = -1,
-                splineIndex = 0,
-                tStart = 0.5f,
-                tEnd = 0.5f
+                exitExit = -1                
             });
         }
         else
