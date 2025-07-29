@@ -34,7 +34,6 @@ public class TrackLevelEditorWindow : EditorWindow
     GameEditor gameEditor;
 
     
-    private PathVisualizer pathVisualizer;
     
     RouteModel routeModel;
     PathFinder pathFinder;
@@ -82,7 +81,6 @@ public class TrackLevelEditorWindow : EditorWindow
         gameEditor = new GameEditor(levelData.gameData, cellManager);
 
         pathFinder = new PathFinder();
-        pathVisualizer = new PathVisualizer();
 
         
     }
@@ -683,7 +681,12 @@ public class TrackLevelEditorWindow : EditorWindow
     {
         var settings = new JsonSerializerSettings
         {
-            Converters = new List<JsonConverter> { new Vector2Converter() },
+            Converters = new List<JsonConverter>
+            {
+                new Vector2Converter(),
+                new Vector2IntConverter(),
+                new Vector3Converter()
+            },
             Formatting = Formatting.Indented
         };
 

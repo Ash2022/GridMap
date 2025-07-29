@@ -8,9 +8,7 @@
       "partId": "CurveRight_1",
       "position": {
         "x": 0,
-        "y": 0,
-        "magnitude": 0.0,
-        "sqrMagnitude": 0
+        "y": 0
       },
       "rotation": 0,
       "splines": []
@@ -20,9 +18,7 @@
       "partId": "Straight_2",
       "position": {
         "x": 0,
-        "y": 1,
-        "magnitude": 1.0,
-        "sqrMagnitude": 1
+        "y": 1
       },
       "rotation": 0,
       "splines": []
@@ -32,9 +28,7 @@
       "partId": "Straight_3",
       "position": {
         "x": 0,
-        "y": 2,
-        "magnitude": 2.0,
-        "sqrMagnitude": 4
+        "y": 2
       },
       "rotation": 0,
       "splines": []
@@ -44,9 +38,7 @@
       "partId": "Straight_4",
       "position": {
         "x": 0,
-        "y": 3,
-        "magnitude": 3.0,
-        "sqrMagnitude": 9
+        "y": 3
       },
       "rotation": 0,
       "splines": []
@@ -56,9 +48,7 @@
       "partId": "Straight_5",
       "position": {
         "x": 0,
-        "y": 4,
-        "magnitude": 4.0,
-        "sqrMagnitude": 16
+        "y": 4
       },
       "rotation": 0,
       "splines": []
@@ -68,9 +58,7 @@
       "partId": "Straight_6",
       "position": {
         "x": 1,
-        "y": 0,
-        "magnitude": 1.0,
-        "sqrMagnitude": 1
+        "y": 0
       },
       "rotation": 90,
       "splines": []
@@ -80,9 +68,7 @@
       "partId": "Straight_7",
       "position": {
         "x": 2,
-        "y": 0,
-        "magnitude": 2.0,
-        "sqrMagnitude": 4
+        "y": 0
       },
       "rotation": 90,
       "splines": []
@@ -92,9 +78,7 @@
       "partId": "Straight_8",
       "position": {
         "x": 3,
-        "y": 0,
-        "magnitude": 3.0,
-        "sqrMagnitude": 9
+        "y": 0
       },
       "rotation": 90,
       "splines": []
@@ -104,9 +88,7 @@
       "partId": "Straight_9",
       "position": {
         "x": 4,
-        "y": 0,
-        "magnitude": 4.0,
-        "sqrMagnitude": 16
+        "y": 0
       },
       "rotation": 90,
       "splines": []
@@ -123,9 +105,7 @@
           "partId": "Straight_5",
           "position": {
             "x": 0,
-            "y": 4,
-            "magnitude": 4.0,
-            "sqrMagnitude": 16
+            "y": 4
           },
           "rotation": 0,
           "splines": []
@@ -145,9 +125,7 @@
           "partId": "Straight_9",
           "position": {
             "x": 4,
-            "y": 0,
-            "magnitude": 4.0,
-            "sqrMagnitude": 16
+            "y": 0
           },
           "rotation": 90,
           "splines": []

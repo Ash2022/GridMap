@@ -8,9 +8,7 @@
       "partId": "Straight_1",
       "position": {
         "x": 0,
-        "y": 4,
-        "magnitude": 4.0,
-        "sqrMagnitude": 16
+        "y": 4
       },
       "rotation": 0,
       "splines": [],
@@ -19,65 +17,47 @@
           "exitIndex": 0,
           "localCell": {
             "x": 0,
-            "y": 0,
-            "magnitude": 0.0,
-            "sqrMagnitude": 0
+            "y": 0
           },
           "rotatedCell": {
             "x": 0,
-            "y": 0,
-            "magnitude": 0.0,
-            "sqrMagnitude": 0
+            "y": 0
           },
           "worldCell": {
             "x": 0,
-            "y": 4,
-            "magnitude": 4.0,
-            "sqrMagnitude": 16
+            "y": 4
           },
           "direction": 0,
           "neighborCell": {
             "x": 0,
-            "y": 3,
-            "magnitude": 3.0,
-            "sqrMagnitude": 9
+            "y": 3
           }
         },
         {
           "exitIndex": 1,
           "localCell": {
             "x": 0,
-            "y": 0,
-            "magnitude": 0.0,
-            "sqrMagnitude": 0
+            "y": 0
           },
           "rotatedCell": {
             "x": 0,
-            "y": 0,
-            "magnitude": 0.0,
-            "sqrMagnitude": 0
+            "y": 0
           },
           "worldCell": {
             "x": 0,
-            "y": 4,
-            "magnitude": 4.0,
-            "sqrMagnitude": 16
+            "y": 4
           },
           "direction": 2,
           "neighborCell": {
             "x": 0,
-            "y": 5,
-            "magnitude": 5.0,
-            "sqrMagnitude": 25
+            "y": 5
           }
         }
       ],
       "occupyingCells": [
         {
           "x": 0,
-          "y": 4,
-          "magnitude": 4.0,
-          "sqrMagnitude": 16
+          "y": 4
         }
       ],
       "allowedPathsGroup": [
@@ -102,9 +82,7 @@
       "partId": "CurveRight2x2_2",
       "position": {
         "x": 0,
-        "y": 2,
-        "magnitude": 2.0,
-        "sqrMagnitude": 4
+        "y": 2
       },
       "rotation": 0,
       "splines": [],
@@ -113,83 +91,59 @@
           "exitIndex": 0,
           "localCell": {
             "x": 0,
-            "y": 1,
-            "magnitude": 1.0,
-            "sqrMagnitude": 1
+            "y": 1
           },
           "rotatedCell": {
             "x": 0,
-            "y": 1,
-            "magnitude": 1.0,
-            "sqrMagnitude": 1
+            "y": 1
           },
           "worldCell": {
             "x": 0,
-            "y": 3,
-            "magnitude": 3.0,
-            "sqrMagnitude": 9
+            "y": 3
           },
           "direction": 2,
           "neighborCell": {
             "x": 0,
-            "y": 4,
-            "magnitude": 4.0,
-            "sqrMagnitude": 16
+            "y": 4
           }
         },
         {
           "exitIndex": 1,
           "localCell": {
             "x": 1,
-            "y": 0,
-            "magnitude": 1.0,
-            "sqrMagnitude": 1
+            "y": 0
           },
           "rotatedCell": {
             "x": 1,
-            "y": 0,
-            "magnitude": 1.0,
-            "sqrMagnitude": 1
+            "y": 0
           },
           "worldCell": {
             "x": 1,
-            "y": 2,
-            "magnitude": 2.236068,
-            "sqrMagnitude": 5
+            "y": 2
           },
           "direction": 1,
           "neighborCell": {
             "x": 2,
-            "y": 2,
-            "magnitude": 2.828427,
-            "sqrMagnitude": 8
+            "y": 2
           }
         }
       ],
       "occupyingCells": [
         {
           "x": 0,
-          "y": 2,
-          "magnitude": 2.0,
-          "sqrMagnitude": 4
+          "y": 2
         },
         {
           "x": 0,
-          "y": 3,
-          "magnitude": 3.0,
-          "sqrMagnitude": 9
+          "y": 3
         },
         {
           "x": 1,
-          "y": 2,
-          "magnitude": 2.236068,
-          "sqrMagnitude": 5
+          "y": 2
         },
         {
           "x": 1,
-          "y": 3,
-          "magnitude": 3.1622777,
-          "sqrMagnitude": 10
+          "y": 3
         }
       ],
       "allowedPathsGroup": [
@@ -214,9 +168,7 @@
       "partId": "Straight_3",
       "position": {
         "x": 2,
-        "y": 2,
-        "magnitude": 2.828427,
-        "sqrMagnitude": 8
+        "y": 2
       },
       "rotation": 90,
       "splines": [],
@@ -225,65 +177,47 @@
           "exitIndex": 0,
           "localCell": {
             "x": 0,
-            "y": 0,
-            "magnitude": 0.0,
-            "sqrMagnitude": 0
+            "y": 0
           },
           "rotatedCell": {
             "x": 0,
-            "y": 0,
-            "magnitude": 0.0,
-            "sqrMagnitude": 0
+            "y": 0
           },
           "worldCell": {
             "x": 2,
-            "y": 2,
-            "magnitude": 2.828427,
-            "sqrMagnitude": 8
+            "y": 2
           },
           "direction": 1,
           "neighborCell": {
             "x": 3,
-            "y": 2,
-            "magnitude": 3.60555124,
-            "sqrMagnitude": 13
+            "y": 2
           }
         },
         {
           "exitIndex": 1,
           "localCell": {
             "x": 0,
-            "y": 0,
-            "magnitude": 0.0,
-            "sqrMagnitude": 0
+            "y": 0
           },
           "rotatedCell": {
             "x": 0,
-            "y": 0,
-            "magnitude": 0.0,
-            "sqrMagnitude": 0
+            "y": 0
           },
           "worldCell": {
             "x": 2,
-            "y": 2,
-            "magnitude": 2.828427,
-            "sqrMagnitude": 8
+            "y": 2
           },
           "direction": 3,
           "neighborCell": {
             "x": 1,
-            "y": 2,
-            "magnitude": 2.236068,
-            "sqrMagnitude": 5
+            "y": 2
           }
         }
       ],
       "occupyingCells": [
         {
           "x": 2,
-          "y": 2,
-          "magnitude": 2.828427,
-          "sqrMagnitude": 8
+          "y": 2
         }
       ],
       "allowedPathsGroup": [
@@ -315,9 +249,7 @@
           "partId": "Straight_1",
           "position": {
             "x": 0,
-            "y": 4,
-            "magnitude": 4.0,
-            "sqrMagnitude": 16
+            "y": 4
           },
           "rotation": 0,
           "splines": [],
@@ -326,65 +258,47 @@
               "exitIndex": 0,
               "localCell": {
                 "x": 0,
-                "y": 0,
-                "magnitude": 0.0,
-                "sqrMagnitude": 0
+                "y": 0
               },
               "rotatedCell": {
                 "x": 0,
-                "y": 0,
-                "magnitude": 0.0,
-                "sqrMagnitude": 0
+                "y": 0
               },
               "worldCell": {
                 "x": 0,
-                "y": 4,
-                "magnitude": 4.0,
-                "sqrMagnitude": 16
+                "y": 4
               },
               "direction": 0,
               "neighborCell": {
                 "x": 0,
-                "y": 3,
-                "magnitude": 3.0,
-                "sqrMagnitude": 9
+                "y": 3
               }
             },
             {
               "exitIndex": 1,
               "localCell": {
                 "x": 0,
-                "y": 0,
-                "magnitude": 0.0,
-                "sqrMagnitude": 0
+                "y": 0
               },
               "rotatedCell": {
                 "x": 0,
-                "y": 0,
-                "magnitude": 0.0,
-                "sqrMagnitude": 0
+                "y": 0
               },
               "worldCell": {
                 "x": 0,
-                "y": 4,
-                "magnitude": 4.0,
-                "sqrMagnitude": 16
+                "y": 4
               },
               "direction": 2,
               "neighborCell": {
                 "x": 0,
-                "y": 5,
-                "magnitude": 5.0,
-                "sqrMagnitude": 25
+                "y": 5
               }
             }
           ],
           "occupyingCells": [
             {
               "x": 0,
-              "y": 4,
-              "magnitude": 4.0,
-              "sqrMagnitude": 16
+              "y": 4
             }
           ],
           "allowedPathsGroup": [
@@ -419,9 +333,7 @@
           "partId": "Straight_3",
           "position": {
             "x": 2,
-            "y": 2,
-            "magnitude": 2.828427,
-            "sqrMagnitude": 8
+            "y": 2
           },
           "rotation": 90,
           "splines": [],
@@ -430,65 +342,47 @@
               "exitIndex": 0,
               "localCell": {
                 "x": 0,
-                "y": 0,
-                "magnitude": 0.0,
-                "sqrMagnitude": 0
+                "y": 0
               },
               "rotatedCell": {
                 "x": 0,
-                "y": 0,
-                "magnitude": 0.0,
-                "sqrMagnitude": 0
+                "y": 0
               },
               "worldCell": {
                 "x": 2,
-                "y": 2,
-                "magnitude": 2.828427,
-                "sqrMagnitude": 8
+                "y": 2
               },
               "direction": 1,
               "neighborCell": {
                 "x": 3,
-                "y": 2,
-                "magnitude": 3.60555124,
-                "sqrMagnitude": 13
+                "y": 2
               }
             },
             {
               "exitIndex": 1,
               "localCell": {
                 "x": 0,
-                "y": 0,
-                "magnitude": 0.0,
-                "sqrMagnitude": 0
+                "y": 0
               },
               "rotatedCell": {
                 "x": 0,
-                "y": 0,
-                "magnitude": 0.0,
-                "sqrMagnitude": 0
+                "y": 0
               },
               "worldCell": {
                 "x": 2,
-                "y": 2,
-                "magnitude": 2.828427,
-                "sqrMagnitude": 8
+                "y": 2
               },
               "direction": 3,
               "neighborCell": {
                 "x": 1,
-                "y": 2,
-                "magnitude": 2.236068,
-                "sqrMagnitude": 5
+                "y": 2
               }
             }
           ],
           "occupyingCells": [
             {
               "x": 2,
-              "y": 2,
-              "magnitude": 2.828427,
-              "sqrMagnitude": 8
+              "y": 2
             }
           ],
           "allowedPathsGroup": [
