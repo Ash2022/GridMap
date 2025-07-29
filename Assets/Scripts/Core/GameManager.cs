@@ -83,7 +83,16 @@ public class GameManager : MonoBehaviour
             var worldPoints = LevelVisualizer.Instance.ExtractWorldPointsFromPath(_lastPath);
             selectedTrain.MoveAlongPath(worldPoints);
 
-            UpdateTrainDirectionFromTraversal(level, selectedTrain, _lastPath);
+            var newDirection = GetTrainDirectionAfterEntering(target.part, target.anchor.exitPin);
+            target.direction = newDirection;
+
+            var trainPoint = selectedTrain.CurrentPointModel;
+
+            trainPoint.direction = newDirection;
+            trainPoint.gridX = target.gridX;
+            trainPoint.gridY = target.gridY;
+            trainPoint.anchor = target.anchor;
+            trainPoint.part = target.part;
 
             _lastTarget = null;
             _lastPath = null;
@@ -143,6 +152,31 @@ public class GameManager : MonoBehaviour
     }
 
 
+    public static TrainDir GetTrainDirectionAfterEntering(PlacedPartInstance part, int enteredExitPin)
+    {
+        if (part == null || part.exits == null || part.exits.Count < 2)
+        {
+            Debug.LogError("Invalid part or exit configuration.");
+            return TrainDir.Right; // fallback
+        }
+
+        // 1. Get the other exit (the one we're now facing)
+        var facingExit = part.exits.FirstOrDefault(e => e.exitIndex != enteredExitPin);
+        if (facingExit == null)
+        {
+            Debug.LogError("Could not find the opposite exit.");
+            return TrainDir.Right;
+        }
+
+        // 2. Get its local direction (0=Up, 1=Right, 2=Down, 3=Left)
+        int localDir = facingExit.direction;
+
+        // 3. Rotate it by part.rotation
+        int worldDir = (localDir + (part.rotation / 90)) % 4;
+
+        // 4. Return the final facing direction
+        return (TrainDir)worldDir;
+    }
 
 
 }
