@@ -236,78 +236,11 @@ public class LevelVisualizer : MonoBehaviour
 
         foreach (var p in level.gameData.points.Where(x => x.type == GamePointType.Train))
         {
-            // 1) figure out WHICH cell to snap to:
-            Vector2 worldCell;
-            if (p.anchor.exitPin >= 0)
-            {
-                var inst = p.part;
-                worldCell = new Vector2(
-                    inst.exits[p.anchor.exitPin].worldCell.x,
-                    inst.exits[p.anchor.exitPin].worldCell.y
-                );
-            }
-            else
-            {
-                worldCell = new Vector2(p.gridX, p.gridY);
-            }
-
-            // 2) convert that worldCell into world‐space exactly like stations:
-            float cellX = worldCell.x - minX + 0.5f;
-            float cellY = worldCell.y - minY + 0.5f;
-            Vector2 flipped = new Vector2(cellX, gridH - cellY);
-            // this is where the TRAIN HEAD should sit:
-            Vector3 trainPos = new Vector3(
-                worldOrigin.x + flipped.x * cellSize,
-                worldOrigin.y + flipped.y * cellSize,
-                0f
-            );
-
-            // 2.5) compute forward/backward in world‐space
-            Vector3 forward = p.direction switch
-            {
-                TrainDir.Up => Vector3.up,
-                TrainDir.Right => Vector3.right,
-                TrainDir.Down => Vector3.down,
-                TrainDir.Left => Vector3.left,
-                _ => Vector3.up
-            };
-            Vector3 backward = -forward;
-
-            // 2.6) Center the head on the point by shifting it back by half a cellSize:
-            Vector3 centerPos = trainPos;// - forward * (cellSize * 0.5f);
-
-            // 3) instantiate & rotate the train at centerPos:
             var trainGO = Instantiate(trainPrefab, mainHolder);
             trainGO.name = $"Train_{p.id}";
-            trainGO.transform.position = centerPos;
-            float angleZ = p.direction switch
-            {
-                TrainDir.Up => 270f,
-                TrainDir.Right => 180f,
-                TrainDir.Down => 90f,
-                TrainDir.Left => 0f,
-                _ => 0f
-            };
-            trainGO.transform.rotation = Quaternion.Euler(0f, 0f, angleZ);
 
-            trainMover = trainGO.GetComponent<TrainMover>();
-
-            float cartSize = cellSize / 3f;
-            float gap = cellSize / 10f;
-            float headBack = cellSize * 0.5f;
-            float firstOffset = headBack + gap + cartSize * 0.5f;
-
-            for (int j = 0; j < p.initialCarts.Count; j++)
-            {
-                var cartGO = Instantiate(cartPrefab, mainHolder);
-                cartGO.name = $"Train_{p.id}_Cart_{j + 1}";
-
-                float offset = firstOffset + (cartSize + gap) * j;
-                cartGO.transform.position = centerPos + backward * offset;
-                cartGO.transform.rotation = trainGO.transform.rotation;
-
-                
-            }
+            var trainController = trainGO.GetComponent<TrainController>();
+            trainController.Init(p, level, worldOrigin,minX,minY, gridH, cellSize, cartPrefab);
         }
         //DrawGlobalSplinePath(level.parts);
 
