@@ -8,9 +8,7 @@
       "partId": "ThreeWay_1",
       "position": {
         "x": 1,
-        "y": 3,
-        "magnitude": 3.1622777,
-        "sqrMagnitude": 10
+        "y": 3
       },
       "rotation": 0,
       "splines": []
@@ -20,9 +18,7 @@
       "partId": "Straight_2",
       "position": {
         "x": 1,
-        "y": 2,
-        "magnitude": 2.236068,
-        "sqrMagnitude": 5
+        "y": 2
       },
       "rotation": 0,
       "splines": []
@@ -32,9 +28,7 @@
       "partId": "Straight_3",
       "position": {
         "x": 1,
-        "y": 5,
-        "magnitude": 5.09901953,
-        "sqrMagnitude": 26
+        "y": 5
       },
       "rotation": 0,
       "splines": []
@@ -44,9 +38,7 @@
       "partId": "Straight_4",
       "position": {
         "x": 2,
-        "y": 3,
-        "magnitude": 3.60555124,
-        "sqrMagnitude": 13
+        "y": 3
       },
       "rotation": 90,
       "splines": []
@@ -63,9 +55,7 @@
           "partId": "Straight_2",
           "position": {
             "x": 1,
-            "y": 2,
-            "magnitude": 2.236068,
-            "sqrMagnitude": 5
+            "y": 2
           },
           "rotation": 0,
           "splines": []
@@ -85,9 +75,7 @@
           "partId": "Straight_3",
           "position": {
             "x": 1,
-            "y": 5,
-            "magnitude": 5.09901953,
-            "sqrMagnitude": 26
+            "y": 5
           },
           "rotation": 0,
           "splines": []
@@ -107,9 +95,7 @@
           "partId": "Straight_4",
           "position": {
             "x": 2,
-            "y": 3,
-            "magnitude": 3.60555124,
-            "sqrMagnitude": 13
+            "y": 3
           },
           "rotation": 90,
           "splines": []

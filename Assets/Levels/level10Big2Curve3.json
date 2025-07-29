@@ -8,9 +8,7 @@
       "partId": "LargeCurveRight3x2_1",
       "position": {
         "x": 2,
-        "y": 4,
-        "magnitude": 4.472136,
-        "sqrMagnitude": 20
+        "y": 4
       },
       "rotation": 180,
       "splines": []
@@ -20,9 +18,7 @@
       "partId": "Straight_2",
       "position": {
         "x": 1,
-        "y": 5,
-        "magnitude": 5.09901953,
-        "sqrMagnitude": 26
+        "y": 5
       },
       "rotation": 90,
       "splines": []
@@ -32,9 +28,7 @@
       "partId": "Straight_3",
       "position": {
         "x": 4,
-        "y": 3,
-        "magnitude": 5.0,
-        "sqrMagnitude": 25
+        "y": 3
       },
       "rotation": 0,
       "splines": []
@@ -51,9 +45,7 @@
           "partId": "Straight_2",
           "position": {
             "x": 1,
-            "y": 5,
-            "magnitude": 5.09901953,
-            "sqrMagnitude": 26
+            "y": 5
           },
           "rotation": 90,
           "splines": []
@@ -73,9 +65,7 @@
           "partId": "Straight_3",
           "position": {
             "x": 4,
-            "y": 3,
-            "magnitude": 5.0,
-            "sqrMagnitude": 25
+            "y": 3
           },
           "rotation": 0,
           "splines": []

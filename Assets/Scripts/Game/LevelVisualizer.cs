@@ -59,7 +59,12 @@ public class LevelVisualizer : MonoBehaviour
     {
         var settings = new JsonSerializerSettings
         {
-            Converters = new List<JsonConverter> { new Vector2Converter() },
+            Converters = new List<JsonConverter>
+            {
+                new Vector2Converter(),
+                new Vector2IntConverter(),
+                new Vector3Converter()
+            },
             Formatting = Formatting.Indented
         };
 
