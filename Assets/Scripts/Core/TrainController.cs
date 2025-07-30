@@ -8,13 +8,16 @@ public class TrainController : MonoBehaviour
     [SerializeField] Transform trainVisuals;
     [SerializeField] TrainClickView trainClickView;
 
-    
+    private List<GameObject> currCarts = new List<GameObject>();
+
     public TrainDir direction;
     public GamePoint CurrentPointModel;
+    float currCellSize;
 
     public void Init(GamePoint p, LevelData level, Vector2 worldOrigin, int minX,int minY, int gridH, float cellSize, GameObject cartPrefab)
     {
-
+        currCellSize = cellSize;
+        currCarts.Clear();
         CurrentPointModel = p;
 
         // 1. Determine the snapped world cell
@@ -104,6 +107,11 @@ public class TrainController : MonoBehaviour
             float offset = firstOffset + (cartSize + gap) * j;
             cartGO.transform.localPosition = backward * offset;
             cartGO.transform.localRotation = Quaternion.identity;
+            cartGO.transform.localScale = new Vector3(cartSize,cartSize, cartSize);
+
+            cartGO.transform.SetParent(transform.parent);
+
+            currCarts.Add(cartGO);
         }
 
 
@@ -121,6 +129,6 @@ public class TrainController : MonoBehaviour
     public void MoveAlongPath(List<Vector3> worldPoints)
     {
         if (mover != null)
-            mover.MoveAlongPath(worldPoints);
+            mover.MoveAlongPath(worldPoints,currCarts, currCellSize);
     }
 }

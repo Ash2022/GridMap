@@ -156,6 +156,8 @@ MonoBehaviour:
     width: 0
     height: 0
     parts: []
+  trains: []
+  selectedTrain: {fileID: 0}
 --- !u!4 &190145369
 Transform:
   m_ObjectHideFlags: 0
@@ -526,6 +528,7 @@ MonoBehaviour:
   frameRenderer: {fileID: 2127980555}
   tileDelay: 0.05
   globalPathRenderer: {fileID: 1784434353}
+  trainMover: {fileID: 0}
   MAX_CELL_SIZE: 100
 --- !u!1 &2127980553
 GameObject:

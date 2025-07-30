@@ -213,25 +213,23 @@ public class LevelVisualizer : MonoBehaviour
 
         foreach (var pt in level.gameData.points.Where(p => p.type == GamePointType.Station))
         {
-            // 1) translate grid coords into [0..W)×[0..H) + 0.5 to center in cell
             float cellX = pt.gridX - minX + 0.5f;
             float cellY = pt.gridY - minY + 0.5f;
-
-            // 2) flip Y so (0,0) is bottom‐left
             Vector2 flipped = new Vector2(cellX, gridH - cellY);
-
-            // 3) to world‐space
             Vector3 worldPos = new Vector3(
                 worldOrigin.x + flipped.x * cellSize,
                 worldOrigin.y + flipped.y * cellSize,
                 0f
             );
 
-            // 4) instantiate
             var go = Instantiate(stationPrefab, mainHolder);
             go.name = $"Station_{pt.id}";
             go.transform.position = worldPos;
-            go.GetComponent<StationView>().Initialize(pt);
+
+            var stationView = go.GetComponent<StationView>();
+
+            var part = level.parts.FirstOrDefault(p => p.partId == pt.anchor.partId);
+            stationView.Initialize(pt, part, cellSize);
         }
 
         foreach (var p in level.gameData.points.Where(x => x.type == GamePointType.Train))

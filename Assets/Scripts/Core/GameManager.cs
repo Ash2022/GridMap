@@ -83,7 +83,11 @@ public class GameManager : MonoBehaviour
             var worldPoints = LevelVisualizer.Instance.ExtractWorldPointsFromPath(_lastPath);
             selectedTrain.MoveAlongPath(worldPoints);
 
-            var newDirection = GetTrainDirectionAfterEntering(target.part, target.anchor.exitPin);
+            int entryExitID = _lastPath.Traversals.Last().entryExit;
+
+            Debug.Log("Entering from ExitID: " +  entryExitID);
+
+            var newDirection = GetTrainDirectionAfterEntering(target.part, entryExitID);
             target.direction = newDirection;
 
             var trainPoint = selectedTrain.CurrentPointModel;
@@ -121,62 +125,39 @@ public class GameManager : MonoBehaviour
         selectedTrain = trainController;
     }
 
-    private void UpdateTrainDirectionFromTraversal(LevelData level, TrainController selectedTrain, PathModel path)
-    {
-        if (path.Traversals.Count < 2)
-        {
-            Debug.Log("Not enough traversal steps to determine direction.");
-            return;
-        }
-
-        var prevTraversal = path.Traversals[0];
-        var currTraversal = path.Traversals[1];
-
-        var prevPart = level.parts.FirstOrDefault(p => p.partId == prevTraversal.partId);
-        var currPart = level.parts.FirstOrDefault(p => p.partId == currTraversal.partId);
-
-        if (prevPart == null || currPart == null)
-        {
-            Debug.Log("Could not resolve part positions for direction calculation.");
-            return;
-        }
-
-        int dx = currPart.position.x - prevPart.position.x;
-        int dy = currPart.position.y - prevPart.position.y;
-
-        if (dx == 1 && dy == 0) selectedTrain.direction = TrainDir.Right;
-        else if (dx == -1 && dy == 0) selectedTrain.direction = TrainDir.Left;
-        else if (dx == 0 && dy == 1) selectedTrain.direction = TrainDir.Up;
-        else if (dx == 0 && dy == -1) selectedTrain.direction = TrainDir.Down;
-        else Debug.Log($"Unhandled direction from delta ({dx},{dy}) → falling back");
-    }
-
-
     public static TrainDir GetTrainDirectionAfterEntering(PlacedPartInstance part, int enteredExitPin)
     {
-        if (part == null || part.exits == null || part.exits.Count < 2)
+        if (part == null || part.exits == null || part.exits.Count != 2)
         {
-            Debug.LogError("Invalid part or exit configuration.");
-            return TrainDir.Right; // fallback
-        }
-
-        // 1. Get the other exit (the one we're now facing)
-        var facingExit = part.exits.FirstOrDefault(e => e.exitIndex != enteredExitPin);
-        if (facingExit == null)
-        {
-            Debug.LogError("Could not find the opposite exit.");
+            Debug.LogError("Part must have exactly 2 exits.");
             return TrainDir.Right;
         }
 
-        // 2. Get its local direction (0=Up, 1=Right, 2=Down, 3=Left)
-        int localDir = facingExit.direction;
+        // Normalize rotation to 0, 90, 180, 270
+        int rot = ((part.rotation % 360) + 360) % 360;
 
-        // 3. Rotate it by part.rotation
-        int worldDir = (localDir + (part.rotation / 90)) % 4;
+        // Determine direction based on rotation and which exit we entered from
+        TrainDir facingDir = TrainDir.Right;
 
-        // 4. Return the final facing direction
-        return (TrainDir)worldDir;
+        if (rot == 0)
+            facingDir = enteredExitPin == 0 ? TrainDir.Down : TrainDir.Up;
+        else if (rot == 90)
+            facingDir = enteredExitPin == 0 ? TrainDir.Left : TrainDir.Right;
+        else if (rot == 180)
+            facingDir = enteredExitPin == 0 ? TrainDir.Up : TrainDir.Down;
+        else if (rot == 270)
+            facingDir = enteredExitPin == 0 ? TrainDir.Right : TrainDir.Left;
+        else
+        {
+            Debug.LogError("Unexpected rotation: " + part.rotation);
+        }
+
+        Debug.Log($"[TrainDirCalc] EnteredExitPin={enteredExitPin}, Rotation={part.rotation} → FinalDir={facingDir}");
+
+        return facingDir;
     }
+
+
 
 
 }
