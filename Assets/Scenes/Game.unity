@@ -517,9 +517,12 @@ MonoBehaviour:
   - {fileID: 21300000, guid: ae7052d2656c2b94997371d7a968f8f5, type: 3}
   - {fileID: 21300000, guid: 8cfd4a08c29901f47ab637510d49dbf8, type: 3}
   - {fileID: 21300000, guid: b5115d1bf64b67049a96bbc860c5a445, type: 3}
+  - {fileID: 21300000, guid: 94e0c229df43348439789ca3836b04a4, type: 3}
   - {fileID: 21300000, guid: ed8ca7599f34e514799e0f095c3be861, type: 3}
+  - {fileID: 21300000, guid: 8851ca80e41e0564d99001fa94a34cdf, type: 3}
   - {fileID: 21300000, guid: f84b25dca794f5245a1727a4d96ccece, type: 3}
-  levelJson: {fileID: 4900000, guid: 11a38fda04eda6f4a84607f76e2d88ff, type: 3}
+  - {fileID: 21300000, guid: edebcb435cf9dce499703ed0ac419bb6, type: 3}
+  levelJson: {fileID: 4900000, guid: 6e826d1a51bf5cd43b668d33412a4c95, type: 3}
   partPrefab: {fileID: 1678834536405887873, guid: 9a1c111077fad0342b1f5d1a8b525097, type: 3}
   stationPrefab: {fileID: 7225796874260481156, guid: 5e9e9912989ad5d4c989134b6a52f358, type: 3}
   trainPrefab: {fileID: 6102414799845618142, guid: cf763bf5645019f4f9fa13aa03ec99c7, type: 3}

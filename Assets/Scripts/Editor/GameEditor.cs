@@ -111,19 +111,17 @@ public class GameEditor
 
     public void DrawStationsUI(Rect gridRect, List<GamePoint> points, CellOccupationManager cellManager, Color[] colors, float cellSize)
     {
-        // Panels go to the right of the grid, stacked vertically.
         const float panelW = 180f;
-        const float stationH = 60f;
-        //const float trainH = 42f;
-        const float personSize = 24f;
-        const float spacing = 12f;
+        float rowH = 22f;         // Total height per station (reduced)
+        const float labelH = 18f;
+        const float personSize = 16f;   // Smaller person icons
+        const float spacing = 4f;
+        const float iconSpacing = 4f;
 
-        float y = gridRect.y; // running y offset
+        float y = gridRect.y;
 
-        // Only stations & trains (you can add Depot later if you want it here too)
         foreach (var p in points.Where(pt => pt.type == GamePointType.Station || pt.type == GamePointType.Train))
         {
-            // Resolve cell/part info
             Vector2Int cell = new Vector2Int(p.gridX, p.gridY);
             string partId = "none";
             if (cellManager != null && cellManager.cellToPart.TryGetValue(cell, out PlacedPartInstance partInst))
@@ -131,47 +129,55 @@ public class GameEditor
 
             if (p.type == GamePointType.Station)
             {
-                Rect box = new Rect(gridRect.xMax + spacing, y, panelW, stationH);
+                Rect box = new Rect(gridRect.xMax + spacing, y, panelW, rowH);
 
-                // Header
-                GUI.Label(new Rect(box.x, box.y, box.width, 18f),
-                          $"Station {p.id} | Cell {cell} | Part: {partId}",
-                          new GUIStyle(GUI.skin.label) { fontSize = 13, fontStyle = FontStyle.Bold });
+                // Station label
+                GUI.Label(
+                    new Rect(box.x, box.y, panelW, labelH),
+                    $"St {p.id} | Cl {cell} | Part: {partId}",
+                    new GUIStyle(GUI.skin.label) { fontSize = 11, fontStyle = FontStyle.Bold });
 
-                // Waiting people
+                // Add Person button
+                Rect addBtn = new Rect(box.xMax, box.y, 75f, labelH);
+                if (GUI.Button(addBtn, "Add Person"))
+                {
+                    p.waitingPeople.Add(0);
+                    Event.current.Use();
+                }
+
+                // Draw people next to the label, wrapping if needed
+                float px = box.x + 4f;
+                float py = box.y + labelH + 2f;
+
                 for (int j = 0; j < p.waitingPeople.Count; j++)
                 {
                     int colorIdx = p.waitingPeople[j];
-                    Rect pr = new Rect(box.x + j * (personSize + 5f), box.y + 22f, personSize, personSize);
+                    if (px + personSize > box.xMax)
+                    {
+                        px = box.x + 4f;
+                        py += personSize + spacing;
+                    }
 
+                    Rect pr = new Rect(px, py, personSize, personSize);
                     EditorGUI.DrawRect(pr, colors[colorIdx % colors.Length]);
                     Handles.color = Color.black;
                     Handles.DrawSolidRectangleWithOutline(pr, Color.clear, Color.black);
 
-                    // Click to cycle color
-                    if (Event.current.type == EventType.MouseDown && Event.current.button == 0 &&
-                        pr.Contains(Event.current.mousePosition))
+                    if (Event.current.type == EventType.MouseDown && pr.Contains(Event.current.mousePosition))
                     {
                         p.waitingPeople[j] = (colorIdx + 1) % colors.Length;
                         Event.current.Use();
-                        //Repaint();
                     }
+
+                    px += personSize + iconSpacing;
                 }
 
-                // Add person button
-                Rect addBtn = new Rect(box.x, box.yMax - 22f, 80f, 18f);
-                if (GUI.Button(addBtn, "Add Person"))
-                {
-                    p.waitingPeople.Add(0);
-                    //Repaint();
-                }
-
-                y += stationH + spacing;
+                y = py + personSize + spacing;
             }
             else // Train
             {
                 // --- sizes (all UI pixels, not grid) ---
-                float rowH = 18f;
+                rowH = 18f;
                 float cartSize = cellSize / 3f;
                 float cartRowY = 42f;   // where the cart row starts (relative to box.y)
                 float addBtnH = 18f;

@@ -19,13 +19,14 @@ public class PathFinder
         log.AppendLine("=== RoutePathFinder ===");
         log.AppendLine($"Start: {startPart.partId}  End: {endPart.partId}");
 
-        // --- build start state set (one per possible entry pin) ---
+        // --- build start state set (try all entry pins for startPart) ---
         var startStates = new List<RouteModel.State>();
 
-        if (_model.parts.TryGetValue(startPart.partId, out var spc) && spc.allowed.Count > 0)
+        if (startExitPin != -999)
         {
-            foreach (var entryPin in spc.allowed.Keys)
-                startStates.Add(new RouteModel.State(startPart.partId, entryPin));
+            // Flip the start exit to determine the proper entry pin
+            int requiredEntryPin = startExitPin == 0 ? 1 : 0;
+            startStates.Add(new RouteModel.State(startPart.partId, requiredEntryPin));
         }
         else if (startPart.exits != null && startPart.exits.Count > 0)
         {
@@ -37,7 +38,6 @@ public class PathFinder
             // fallback synthetic entry
             startStates.Add(new RouteModel.State(startPart.partId, -1));
         }
-
         // goal predicate
         bool IsGoal(RouteModel.State s) => s.partId == endPart.partId;
 
@@ -58,37 +58,73 @@ public class PathFinder
         // ---- main loop ----
         while (open.Count > 0)
         {
-            // extract-min
+            // ─── Extract-Min ─────────────────────────────────────────────
             RouteModel.State u = default;
             float best = float.PositiveInfinity;
             int idx = -1;
             for (int i = 0; i < open.Count; i++)
             {
                 float d = dist[open[i]];
-                if (d < best) { best = d; u = open[i]; idx = i; }
+                if (d < best)
+                {
+                    best = d;
+                    u = open[i];
+                    idx = i;
+                }
             }
-            open.RemoveAt(idx);
-            if (!closed.Add(u)) continue;
 
+            open.RemoveAt(idx);
+            if (!closed.Add(u))
+            {
+                log.AppendLine($"[Skip] State already closed: {u}");
+                continue;
+            }
+
+            log.AppendLine($"[Visit] State={u}  CostSoFar={best}");
+
+            // ─── Goal Check ─────────────────────────────────────────────
             if (IsGoal(u))
             {
                 foundGoals.Add((u, best));
-                log.AppendLine($"Reached goal state: {u} cost={best}");
+                log.AppendLine($"✅ Reached goal state: {u}  totalCost={best}");
+                continue;
             }
 
-            // expand
-            if (!_model.parts.TryGetValue(u.partId, out var pc)) continue;
-            if (!pc.allowed.TryGetValue(u.entryPin, out var internalList)) continue;
+            // ─── Expansion ─────────────────────────────────────────────
+            if (!_model.parts.TryGetValue(u.partId, out var pc))
+            {
+                log.AppendLine($"❌ Part not found: {u.partId}");
+                continue;
+            }
+
+            if (!pc.allowed.TryGetValue(u.entryPin, out var internalList))
+            {
+                log.AppendLine($"❌ No allowed paths from entryPin={u.entryPin} on part {u.partId}");
+                continue;
+            }
+
+            if (internalList.Count == 0)
+            {
+                log.AppendLine($"⚠️ No internal paths from state: {u}");
+                continue;
+            }
 
             for (int i = 0; i < internalList.Count; i++)
             {
                 var a = internalList[i];
 
                 if (!pc.neighborByExit.TryGetValue(a.exitPin, out var nb))
-                    continue; // dangling exit, ignore
+                {
+                    log.AppendLine($"❌ ExitPin {a.exitPin} from part {u.partId} has no neighbor. Dangling?");
+                    continue;
+                }
 
                 var v = new RouteModel.State(nb.neighborPartId, nb.neighborPin);
-                if (closed.Contains(v)) continue;
+                if (closed.Contains(v))
+                {
+                    log.AppendLine($"[Skip] Neighbor state already closed: {v}");
+                    continue;
+                }
 
                 float edgeCost = a.internalLen + nb.externalLen;
                 float nd = best + edgeCost;
@@ -102,7 +138,16 @@ public class PathFinder
                         exitPin = a.exitPin,
                         edgeCost = edgeCost
                     };
-                    if (!open.Contains(v)) open.Add(v);
+
+                    if (!open.Contains(v))
+                    {
+                        open.Add(v);
+                        log.AppendLine($"→ Added to open: {v} via ExitPin {a.exitPin} (cost={edgeCost}, total={nd})");
+                    }
+                    else
+                    {
+                        log.AppendLine($"↻ Updated cost for {v} to {nd} via ExitPin {a.exitPin}");
+                    }
                 }
             }
         }
