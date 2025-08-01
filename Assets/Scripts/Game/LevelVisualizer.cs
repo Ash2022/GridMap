@@ -40,6 +40,8 @@ public class LevelVisualizer : MonoBehaviour
     LevelData currLevel;
 
     public float CellSize { get => cellSize; set => cellSize = value; }
+    public GameObject CartPrefab { get => cartPrefab; set => cartPrefab = value; }
+
     public float MAX_CELL_SIZE = 100;
 
     void Awake()
