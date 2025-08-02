@@ -23,37 +23,34 @@ public class TrainController : MonoBehaviour
     [Header("Capacity")]
     public int reservedCartSlots = 20;
 
+    // Quick facts (handy for logs/debug)
+    public int TrainId => CurrentPointModel?.id ?? 0;
+    public Vector3 HeadWorldPos => transform.position;
+
     public void Init(GamePoint p, LevelData level, Vector2 worldOrigin, int minX, int minY, int gridH, float cellSize, GameObject cartPrefab)
     {
         currCellSize = cellSize;
         currCarts.Clear();
 
-        // NEW: prep offsets list
         if (cartCenterOffsets == null) cartCenterOffsets = new List<float>();
         cartCenterOffsets.Clear();
 
         CurrentPointModel = p;
 
-        // 1. Determine the snapped world cell
+        // 1) Snapped world cell
         Vector2 worldCell = p.anchor.exitPin >= 0
-            ? new Vector2(
-                p.part.exits[p.anchor.exitPin].worldCell.x,
-                p.part.exits[p.anchor.exitPin].worldCell.y
-              )
+            ? new Vector2(p.part.exits[p.anchor.exitPin].worldCell.x, p.part.exits[p.anchor.exitPin].worldCell.y)
             : new Vector2(p.gridX, p.gridY);
 
-        // 2. Convert cell to world space
+        // 2) Cell -> world
         float cellX = worldCell.x - minX + 0.5f;
         float cellY = worldCell.y - minY + 0.5f;
         Vector2 flipped = new Vector2(cellX, gridH - cellY);
-        Vector3 centerPos = new Vector3(
-            worldOrigin.x + flipped.x * cellSize,
-            worldOrigin.y + flipped.y * cellSize,
-            0f
-        );
+        Vector3 centerPos = new Vector3(worldOrigin.x + flipped.x * cellSize,
+                                        worldOrigin.y + flipped.y * cellSize, 0f);
         transform.position = centerPos;
 
-        // 3. Apply rotation based on direction
+        // 3) Apply rotation based on direction
         float angleZ = p.direction switch
         {
             TrainDir.Up => 270f,
@@ -64,30 +61,29 @@ public class TrainController : MonoBehaviour
         };
         transform.rotation = Quaternion.Euler(0f, 0f, angleZ);
 
+        // 3.1) Scale visuals using LOCAL bounds (axis-stable)
         if (trainVisuals != null)
         {
-            float length = cellSize;         // X axis → forward/back
-            float width = cellSize / 3f;     // Y axis → side-to-side
-            float height = cellSize / 3f;    // Z axis → vertical
+            float targetLen = cellSize;          // local +X (forward/back)
+            float targetWid = cellSize / 3f;     // local +Y (side)
+            float targetHgt = cellSize / 3f;     // local +Z (up)
 
-            var meshRenderer = trainVisuals.GetComponent<MeshRenderer>();
-            if (meshRenderer != null)
+            var mr = trainVisuals.GetComponent<MeshRenderer>();
+            if (mr != null)
             {
-                var size = meshRenderer.bounds.size;
-
+                var size = mr.localBounds.size;  // local, unaffected by root rotation
                 if (size.x > 0f && size.y > 0f && size.z > 0f)
                 {
-                    float scaleX = length / size.x;   // forward length
-                    float scaleY = scaleX / 3f;         // width
-                    float scaleZ = scaleX / 3f;         // height
-
+                    float scaleX = targetLen / size.x;
+                    float scaleY = targetWid / size.y;
+                    float scaleZ = targetHgt / size.z;
                     trainVisuals.localScale = new Vector3(scaleX, scaleY, scaleZ);
                 }
             }
         }
 
-        // 4. Carts
-        Vector3 forward = p.direction switch
+        // 4) Carts
+        Vector3 forwardWS = p.direction switch
         {
             TrainDir.Up => Vector3.up,
             TrainDir.Right => Vector3.right,
@@ -95,14 +91,14 @@ public class TrainController : MonoBehaviour
             TrainDir.Left => Vector3.left,
             _ => Vector3.up
         };
-        Vector3 backward = -forward;
+        initialForward = forwardWS;
 
-        // NEW: cache geometry for later math (no inspector)
-        headHalfLength = cellSize * 0.5f;    // head center → rear/front face (we use rear later)
-        cartHalfLength = (cellSize / 3f) * 0.5f;
-
+        // Geometry cache
         float cartSize = cellSize / 3f;
         float gap = cellSize / 10f;
+        headHalfLength = cellSize * 0.5f;
+        cartHalfLength = cartSize * 0.5f;
+
         float headBack = headHalfLength;
         float firstOffset = headBack + gap + cartHalfLength;
 
@@ -112,36 +108,34 @@ public class TrainController : MonoBehaviour
             return;
         }
 
+        // IMPORTANT: place carts in LOCAL space along -X (backwards along the train's length)
+        Vector3 localBackward = Vector3.right;
+
         for (int j = 0; j < p.initialCarts.Count; j++)
         {
-            var cartGO = Instantiate(cartPrefab, cartHolder);
+            var cartGO = Instantiate(cartPrefab, cartHolder, false); // keep local space
             cartGO.name = $"Train_{p.id}_Cart_{j + 1}";
 
-            float offset = firstOffset + (cartSize + gap) * j;     // distance of CART CENTER behind HEAD CENTER
-            cartGO.transform.localPosition = backward * offset;
+            float offset = firstOffset + (cartSize + gap) * j; // center distance behind head center
+            cartGO.transform.localPosition = localBackward * offset;
             cartGO.transform.localRotation = Quaternion.identity;
             cartGO.transform.localScale = new Vector3(cartSize, cartSize, cartSize);
 
-            // keep world pose
-            cartGO.transform.SetParent(transform.parent);
+            // Keep world pose but make them siblings (matches your previous setup)
+            cartGO.transform.SetParent(transform.parent, true);
 
             currCarts.Add(cartGO);
-
-            // NEW: record the exact path-space center offset we used
             cartCenterOffsets.Add(offset);
         }
 
-        // NEW: align initial cart rotations to head to avoid first-frame pop
+        // Align initial cart rotations to head
         for (int i = 0; i < currCarts.Count; i++)
             currCarts[i].transform.rotation = transform.rotation;
 
-        // NEW: expose forward and required tape length for the mover
-        initialForward = forward;
-
-        // tail is last cart center offset + half cart length
-        float tailOffsetFromHeadCenter = (currCarts.Count > 0) ? cartCenterOffsets[cartCenterOffsets.Count - 1] + cartHalfLength : 0f;
-
-        // small margin so the sampler has room
+        // Tape length requirement (tail offset + small margin)
+        float tailOffsetFromHeadCenter = (currCarts.Count > 0)
+            ? cartCenterOffsets[^1] + cartHalfLength
+            : 0f;
         requiredTapeLength = tailOffsetFromHeadCenter + gap + 0.1f;
 
         GameManager.Instance.trains.Add(this);
@@ -161,7 +155,7 @@ public class TrainController : MonoBehaviour
 
     private void TrainReachedDestination()
     {
-        OnArrivedStation_AddCart();
+        //OnArrivedStation_AddCart();
     }
 
     public void OnArrivedStation_AddCart()
@@ -216,4 +210,64 @@ public class TrainController : MonoBehaviour
         mover.AddCartOffset(newCenterOffset);
     }
 
+    // Already present; keep it public so others can read it
+    public float GetTrainLengthMeters()
+    {
+        if (cartCenterOffsets != null && cartCenterOffsets.Count > 0)
+            return cartCenterOffsets[cartCenterOffsets.Count - 1] + cartHalfLength; // head->tail
+        return headHalfLength; // no carts yet
+    }
+
+    /// <summary>
+    /// Sample a single point on this train's back tape at 'backDistance' meters behind the head.
+    /// Returns false if the tape isn't long enough yet (e.g., just spawned).
+    /// </summary>
+    public bool TryGetBackPoint(float backDistance, out Vector3 pos)
+    {
+        pos = default;
+        var mv = mover != null ? mover : GetComponent<TrainMover>();
+        if (mv == null) return false;
+
+        if (!mv.TryGetPoseAtBackDistance(Mathf.Max(0f, backDistance), out var p, out _))
+            return false;
+
+        pos = p;
+        return true;
+    }
+
+    /// <summary>
+    /// Build the occupied slice polyline for this (stationary) train:
+    /// the last (trainLength + safetyGap) meters of its back tape.
+    /// Returns false if the tape is shorter (e.g., very early in the level).
+    /// Points are in world space, ordered from nearest-to-head to farthest-back.
+    /// </summary>
+    public bool TryGetOccupiedBackSlice(float safetyGap, float sampleStep, out List<Vector3> points)
+    {
+        points = null;
+
+        var mv = mover != null ? mover : GetComponent<TrainMover>();
+        if (mv == null) return false;
+
+        float backLen = Mathf.Max(0f, GetTrainLengthMeters() + Mathf.Max(0f, safetyGap));
+        if (backLen <= 1e-6f) return false;
+
+        // Sample along the tape every ~sampleStep (include endpoints).
+        int count = Mathf.Max(2, Mathf.CeilToInt(backLen / Mathf.Max(1e-5f, sampleStep)) + 1);
+        float step = backLen / (count - 1);
+
+        var pts = new List<Vector3>(count);
+        for (int i = 0; i < count; i++)
+        {
+            float d = i * step; // 0..backLen behind head
+            if (!mv.TryGetPoseAtBackDistance(d, out var p, out _))
+            {
+                // Tape not long enough: abort (caller can treat as "no reliable data yet")
+                return false;
+            }
+            pts.Add(p);
+        }
+
+        points = pts;
+        return true;
+    }
 }

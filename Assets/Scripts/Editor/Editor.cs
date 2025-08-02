@@ -165,7 +165,7 @@ public class TrackLevelEditorWindow : EditorWindow
             }
         }
 
-        GUILayout.Space(8);
+        GUILayout.Space(100);
 
         DrawSaveLoadButtons();
 

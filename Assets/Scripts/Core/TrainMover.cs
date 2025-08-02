@@ -37,6 +37,13 @@ public class TrainMover : MonoBehaviour
     // back path tape (persists across legs)
     private PathTape tape = new PathTape();
 
+
+    [Header("Collision (simple)")]
+    public bool collisionsEnabled = true;
+    public float safetyGap = 0.0f;          // meters added behind stationary trains (along tape)
+    public float collisionSampleStep = 0.0f; // if 0, we'll default to cellSize/8 at runtime
+    public float collisionEps = 1e-4f;      // ~ 1e-4 * cellSize; set in MoveAlongPath from cellSize
+
     // ─────────────────────────────────────────────────────────────────────────────
     // PUBLIC API
 
@@ -91,6 +98,10 @@ public class TrainMover : MonoBehaviour
             tape.EnsurePrefix(pathPts[0], startFwd, reservedBackMeters + 0.1f);
         }
 
+        // init collision defaults once per leg
+        if (collisionSampleStep <= 0f) collisionSampleStep = cellSize / 8f;
+        if (collisionEps <= 0f) collisionEps = Mathf.Max(1e-5f, 1e-4f * cellSize);
+
         moveCoroutine = StartCoroutine(MoveRoutine(onArrivedStation));
     }
 
@@ -122,6 +133,11 @@ public class TrainMover : MonoBehaviour
     {
         isMoving = true;
 
+        // Collision tunables (simple defaults; tweak if you like)
+        float sampleStep = Mathf.Max(1e-5f, cellSize / 8f);     // resample ~every 1/8 cell
+        float eps = Mathf.Max(1e-5f, 1e-4f * cellSize);  // numeric tolerance
+        float safetyGap = 0f;                                   // along-tape gap behind other trains
+
         // initialize arc-length and segment index
         sHead = 0f;
         segIndex = 0;
@@ -149,31 +165,40 @@ public class TrainMover : MonoBehaviour
 
         // MAIN LOOP
         Vector3 prevHeadPos = headPos0;
+        var myCtrl = GetComponent<TrainController>();
+
         while (sHead < totalLen)
         {
-            float ds = moveSpeed * Time.deltaTime;
-            if (ds > 0f)
+            float want = moveSpeed * Time.deltaTime;
+            if (want > 0f)
             {
-                sHead = Mathf.Min(sHead + ds, totalLen);
+                // ---- collision cap (single mover): compare our moving slice vs each other train's occupied back slice ----
+                float allowed = ComputeAllowedAdvance(want);
 
-                // head pose
-                SampleForward(sHead, out Vector3 headPos, out Quaternion headRot);
-                transform.position = headPos;
-                transform.rotation = headRot * Quaternion.Euler(0, 0, -90f);
-
-                // append actual movement to tape (real curve), then trim to capacity
-                tape.AppendSegment(prevHeadPos, headPos);
-                prevHeadPos = headPos;
-                tape.TrimToCapacity();
-
-                // carts from real tape
-                for (int i = 0; i < carts.Count; i++)
+                if (allowed > 1e-6f)
                 {
-                    float sBack = offsets[i];
-                    tape.SampleBack(sBack, out Vector3 cPos, out Vector3 cTan, out _);
-                    carts[i].transform.position = cPos;
-                    carts[i].transform.rotation = Quaternion.LookRotation(Vector3.forward, cTan) * Quaternion.Euler(0, 0, -90f);
+                    sHead = Mathf.Min(sHead + allowed, totalLen);
+
+                    // head pose
+                    SampleForward(sHead, out Vector3 headPos, out Quaternion headRot);
+                    transform.position = headPos;
+                    transform.rotation = headRot * Quaternion.Euler(0, 0, -90f);
+
+                    // append actual movement to tape (real curve), then trim to capacity
+                    tape.AppendSegment(prevHeadPos, headPos);
+                    prevHeadPos = headPos;
+                    tape.TrimToCapacity();
+
+                    // carts from real tape
+                    for (int i = 0; i < carts.Count; i++)
+                    {
+                        float sBack = offsets[i];
+                        tape.SampleBack(sBack, out Vector3 cPos, out Vector3 cTan, out _);
+                        carts[i].transform.position = cPos;
+                        carts[i].transform.rotation = Quaternion.LookRotation(Vector3.forward, cTan) * Quaternion.Euler(0, 0, -90f);
+                    }
                 }
+                // else: blocked this frame → idle; try again next frame
             }
 
             yield return null;
@@ -370,4 +395,155 @@ public class TrainMover : MonoBehaviour
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Returns how far we can advance (≤ want) before intersecting any other train's occupied back-slice.
+    /// Uses the mover's forward path for the moving-slice, and each other train's back tape for occupancy.
+    /// </summary>
+    private float ComputeAllowedAdvance(float want)
+    {
+        // Substep loop to avoid tunneling: clamp per-iter ≤ sampleStep/2
+        float remaining = Mathf.Min(want, totalLen - sHead);
+        float advanced = 0f;
+
+        while (remaining > 1e-6f)
+        {
+            float iter = Mathf.Min(remaining, collisionSampleStep * 0.5f, totalLen - (sHead + advanced));
+            if (iter <= 1e-6f) break;
+
+            // Build moving slice polyline from sHead+advanced .. +advanced+iter
+            var movingSlice = BuildForwardSlice(sHead + advanced, sHead + advanced + iter, collisionSampleStep);
+
+            // Test against every other (stationary) train's occupied slice
+            float cap = iter; // how much of 'iter' we can actually take
+            var trains = GameManager.Instance.trains; // your global list of TrainController
+            for (int i = 0; i < trains.Count; i++)
+            {
+                var other = trains[i];
+                if (other == null) continue;
+                if (other.gameObject == this.gameObject) continue; // same train
+                if (!other.TryGetOccupiedBackSlice(safetyGap, collisionSampleStep, out var occupiedSlice)) continue;
+
+                // Intersect movingSlice (this frame) with other train's occupied back slice
+                if (IntersectPolylines(movingSlice, occupiedSlice, collisionEps, out float alongMoving))
+                {
+                    // Contact within this iter; allow up to just before contact
+                    cap = Mathf.Min(cap, Mathf.Max(0f, alongMoving));
+                    // Early exit: can't get better than 0
+                    if (cap <= 1e-6f) break;
+                }
+            }
+
+            advanced += cap;
+
+            // If we were blocked inside this iter, stop substepping this frame
+            if (cap + 1e-6f < iter) break;
+
+            remaining -= iter;
+        }
+
+        return advanced;
+    }
+
+    /// <summary>Builds a world-space polyline along our forward path between s0..s1 (inclusive), sampled ~ every 'step' meters.</summary>
+    private List<Vector3> BuildForwardSlice(float s0, float s1, float step)
+    {
+        if (s1 < s0) (s0, s1) = (s1, s0);
+        float len = Mathf.Max(0f, s1 - s0);
+        int count = Mathf.Max(2, Mathf.CeilToInt(len / Mathf.Max(1e-5f, step)) + 1);
+        var pts = new List<Vector3>(count);
+        for (int i = 0; i < count; i++)
+        {
+            float u = (count == 1) ? 0f : i / (float)(count - 1);
+            float s = Mathf.Lerp(s0, s1, u);
+            SampleForward(s, out Vector3 pos, out _);
+            pts.Add(pos);
+        }
+        return pts;
+    }
+
+    /// <summary>
+    /// Polyline–polyline intersection. Detects both proper crossings and colinear overlaps.
+    /// Returns the first hit distance along 'A' (moving slice) in meters.
+    /// </summary>
+    private static bool IntersectPolylines(List<Vector3> A, List<Vector3> B, float eps, out float alongA)
+    {
+        alongA = 0f;
+        float accA = 0f;
+        for (int i = 0; i < A.Count - 1; i++)
+        {
+            Vector2 a0 = A[i]; Vector2 a1 = A[i + 1];
+            float aLen = Vector2.Distance(a0, a1);
+            if (aLen <= eps) { accA += aLen; continue; }
+
+            float accB = 0f;
+            for (int j = 0; j < B.Count - 1; j++)
+            {
+                Vector2 b0 = B[j]; Vector2 b1 = B[j + 1];
+                float bLen = Vector2.Distance(b0, b1);
+                if (bLen <= eps) { accB += bLen; continue; }
+
+                if (TryIntersectSegments2D(a0, a1, b0, b1, eps, out float ta, out float tb, out bool colinear, out _))
+                {
+                    if (!colinear)
+                    {
+                        alongA = accA + Mathf.Clamp01(ta) * aLen;
+                        return true;
+                    }
+                    else
+                    {
+                        // Colinear overlap: if there is any positive-length overlap, treat as hit at start of this a-segment
+                        // More accurate: compute overlap start along A; for puzzles this early exit is fine
+                        alongA = accA;
+                        return true;
+                    }
+                }
+                accB += bLen;
+            }
+            accA += aLen;
+        }
+        return false;
+    }
+
+    // Robust 2D segment intersection with colinearity detection
+    private static bool TryIntersectSegments2D(Vector2 p, Vector2 p2, Vector2 q, Vector2 q2, float eps,
+                                               out float tP, out float tQ, out bool colinear, out Vector2 inter)
+    {
+        tP = tQ = 0f; inter = Vector2.zero; colinear = false;
+        Vector2 r = p2 - p;
+        Vector2 s = q2 - q;
+        float rxs = r.x * s.y - r.y * s.x;
+        float q_pxr = (q.x - p.x) * r.y - (q.y - p.y) * r.x;
+
+        if (Mathf.Abs(rxs) < eps && Mathf.Abs(q_pxr) < eps)
+        {
+            // Colinear – check overlap
+            colinear = true;
+            float rr = Vector2.Dot(r, r);
+            if (rr < eps) return false;
+            float t0 = Vector2.Dot(q - p, r) / rr;
+            float t1 = Vector2.Dot(q2 - p, r) / rr;
+            float tmin = Mathf.Max(0f, Mathf.Min(t0, t1));
+            float tmax = Mathf.Min(1f, Mathf.Max(t0, t1));
+            if (tmax - tmin < eps) return false; // no overlap
+            tP = tmin; tQ = 0f; inter = p + r * ((tmin + tmax) * 0.5f);
+            return true;
+        }
+
+        if (Mathf.Abs(rxs) < eps) return false; // parallel, non-intersecting
+
+        float t = ((q.x - p.x) * s.y - (q.y - p.y) * s.x) / rxs;
+        float u = ((q.x - p.x) * r.y - (q.y - p.y) * r.x) / rxs;
+
+        if (t >= -eps && t <= 1f + eps && u >= -eps && u <= 1f + eps)
+        {
+            t = Mathf.Clamp01(t);
+            u = Mathf.Clamp01(u);
+            inter = p + t * r;
+            tP = t; tQ = u;
+            return true;
+        }
+        return false;
+    }
+
 }
