@@ -40,9 +40,15 @@ public class TrainMover : MonoBehaviour
 
     [Header("Collision (simple)")]
     public bool collisionsEnabled = true;
+    public bool collisionDebug = true;
+
+    List<Vector3> dbgMovingSlice, dbgBlockedSlice;
+    int dbgBlockerId = 0;
     public float safetyGap = 0.0f;          // meters added behind stationary trains (along tape)
     public float collisionSampleStep = 0.0f; // if 0, we'll default to cellSize/8 at runtime
     public float collisionEps = 1e-4f;      // ~ 1e-4 * cellSize; set in MoveAlongPath from cellSize
+
+    private bool tapeSeeded = false;
 
     // ─────────────────────────────────────────────────────────────────────────────
     // PUBLIC API
@@ -148,7 +154,8 @@ public class TrainMover : MonoBehaviour
         transform.rotation = headRot0 * Quaternion.Euler(0, 0, -90f);
 
         // Seed tape with the actual head position (from now on we append every movement)
-        tape.AppendPoint(headPos0);
+        if (!tapeSeeded) 
+            tape.AppendPoint(headPos0);
 
         // place carts immediately from tape/prefix
         for (int i = 0; i < carts.Count; i++)
@@ -169,6 +176,8 @@ public class TrainMover : MonoBehaviour
 
         while (sHead < totalLen)
         {
+            OnDrawGizmosSelected();
+
             float want = moveSpeed * Time.deltaTime;
             if (want > 0f)
             {
@@ -430,7 +439,20 @@ public class TrainMover : MonoBehaviour
                     // Contact within this iter; allow up to just before contact
                     cap = Mathf.Min(cap, Mathf.Max(0f, alongMoving));
                     // Early exit: can't get better than 0
+
+                    if (collisionDebug)
+                    {
+                        dbgMovingSlice = movingSlice;
+                        dbgBlockedSlice = occupiedSlice;
+                        dbgBlockerId = other.TrainId;
+                        Debug.Log($"[TrainMover] BLOCKED by Train {dbgBlockerId}  allowed={cap:F3}m");
+                    }
+
                     if (cap <= 1e-6f) break;
+                }
+                else if (collisionDebug && occupiedSlice == null)
+                {
+                    Debug.LogWarning($"[TrainMover] Other train {other.TrainId} has no occupied slice (tape too short?)");
                 }
             }
 
@@ -546,4 +568,55 @@ public class TrainMover : MonoBehaviour
         return false;
     }
 
+    /// <summary>Seed a straight back-tape behind the current head so collisions work before any movement.</summary>
+    public void SeedTapePrefixStraight(Vector3 headPos, Vector3 forwardWorld, float length, float sampleStep)
+    {
+        tapeSeeded = true;
+
+        length = Mathf.Max(0f, length);
+        sampleStep = Mathf.Max(1e-5f, sampleStep);
+
+        // Start point (farthest back), then march toward the head
+        Vector3 backDir = (-forwardWorld).normalized;
+        Vector3 start = headPos + backDir * length;
+
+        int count = Mathf.Max(2, Mathf.CeilToInt(length / sampleStep) + 1);
+
+        // First point
+        tape.AppendPoint(start);
+
+        // Build segments toward the head
+        Vector3 prev = start;
+        for (int i = 1; i < count; i++)
+        {
+            float t = i / (float)(count - 1);              // 0..1
+            Vector3 p = Vector3.Lerp(start, headPos, t);
+            tape.AppendSegment(prev, p);
+            prev = p;
+        }
+
+        // Ensure exact head as last point (no-op if prev==headPos)
+        if ((prev - headPos).sqrMagnitude > 1e-12f)
+            tape.AppendSegment(prev, headPos);
+
+        tape.TrimToCapacity();
+    }
+
+
+    void OnDrawGizmosSelected()
+    {
+        if (!collisionDebug) return;
+        if (dbgMovingSlice != null)
+        {
+            Gizmos.color = Color.cyan;
+            for (int i = 0; i < dbgMovingSlice.Count - 1; i++)
+                Gizmos.DrawLine(dbgMovingSlice[i], dbgMovingSlice[i + 1]);
+        }
+        if (dbgBlockedSlice != null)
+        {
+            Gizmos.color = Color.magenta;
+            for (int i = 0; i < dbgBlockedSlice.Count - 1; i++)
+                Gizmos.DrawLine(dbgBlockedSlice[i], dbgBlockedSlice[i + 1]);
+        }
+    }
 }

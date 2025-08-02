@@ -138,6 +138,14 @@ public class TrainController : MonoBehaviour
             : 0f;
         requiredTapeLength = tailOffsetFromHeadCenter + gap + 0.1f;
 
+
+        // Seed back tape so this train can be collided with before it ever moves
+        
+        float step = Mathf.Max(1e-5f, currCellSize / 8f);
+        mover.SeedTapePrefixStraight(transform.position, initialForward, requiredTapeLength, step);
+        
+
+
         GameManager.Instance.trains.Add(this);
         trainClickView.Init(TrainWasClicked);
     }
