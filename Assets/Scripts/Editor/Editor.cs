@@ -253,15 +253,8 @@ public class TrackLevelEditorWindow : EditorWindow
 
         if (GUILayout.Button("Validate"))
         {
-            var g = new GridContext
-            {
-                worldOriginBL = Vector2.zero, // or your actual world offset
-                minX = levelData.parts.Min(p => p.position.x),
-                minY = levelData.parts.Min(p => p.position.y),
-                gridH = gridHeight,
-                cellSize = cellSize
-            };
-            var report = scenarioEditor.Sim_Validate(levelData, g); // simple wrapper that calls SimController.ValidateFromBaked
+            
+            var report = scenarioEditor.Sim_Validate(levelData); // simple wrapper that calls SimController.ValidateFromBaked
             Debug.Log(report.ToString());
         }
 

@@ -472,9 +472,9 @@ public class ScenarioEditor
     /// <param name="level">Your LevelData (for parts/baked splines)</param>
     /// <param name="g">GridContext (worldOrigin/minX/minY/gridH-in-cells/cellSize)</param>
     /// <param name="metersPerTick">Optional override; if &lt;=0 uses SimController.DefaultMetersPerTick</param>
-    public SimController.ValidationReport Sim_Validate(LevelData level, /* if GridContext is top-level: */ GridContext g, float metersPerTick = -1f)
+    public SimController.ValidationReport Sim_Validate(LevelData level, float metersPerTick = -1f)
     {
         float mpt = (metersPerTick > 0f) ? metersPerTick : _sim.DefaultMetersPerTick;
-        return _sim.ValidateFromBaked(level, g, _data, mpt);
+        return _sim.ValidateFromBaked(level, gridContext, _data, mpt);
     }
 }
