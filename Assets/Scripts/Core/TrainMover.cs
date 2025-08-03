@@ -54,8 +54,8 @@ public class TrainMover : MonoBehaviour
         // Cache inputs
         carts = currCarts ?? new List<GameObject>();
         cellSize = currCellSize;
-        cartHalfLen = (cellSize / 3f) * 0.5f;
-        headHalfLen = cellSize * 0.5f;
+        cartHalfLen = SimTuning.CartHalfLen(cellSize);
+        headHalfLen = SimTuning.HeadHalfLen(cellSize);
 
         // Build cart center offsets from current world poses (keep exact visual spacing at start of leg)
         offsets.Clear();
@@ -69,28 +69,28 @@ public class TrainMover : MonoBehaviour
         }
 
         // Configure core sim for this leg
-        float step = (collisionSampleStep > 0f) ? collisionSampleStep : (cellSize / 8f);
-        float eps = (collisionEps > 0f) ? collisionEps : Mathf.Max(1e-5f, 1e-4f * cellSize);
+        float step = (collisionSampleStep > 0f) ? collisionSampleStep : SimTuning.SampleStep(cellSize);
+        float eps = (collisionEps > 0f) ? collisionEps : SimTuning.Eps(cellSize);
         sim.Configure(cellSize, sampleStep: step, eps: eps, safetyGap: Mathf.Max(0f, safetyGap));
         sim.LoadLeg(worldPoints);
         sim.SetCartOffsets(offsets);
 
         // Ensure tape capacity at least tail + small margin
-        float gap = cellSize / 10f;
-        float lastCenter = offsets.Count > 0 ? offsets[^1] : 0f;
-        float capacity = lastCenter + cartHalfLen + gap + 0.1f;
+        float gap = SimTuning.Gap(cellSize);
+        float lastCenter = (offsets.Count > 0) ? offsets[offsets.Count - 1] : 0f;
+        float capacity = lastCenter + cartHalfLen + gap + SimTuning.TapeMarginMeters;
         sim.TapeCapacityMeters = capacity;
 
         // Fallback seeding (in case controller didn't pre-seed at spawn)
         // Reserve a straight prefix behind start, enough for 'reservedCartSlots'
         if (!TryGetPoseAtBackDistance(0.01f, out _, out _)) // tape not seeded yet
         {
-            float cartLen = cellSize / 3f;
+            float cartLen = SimTuning.CartLen(cellSize);
             float firstOffset = headHalfLen + gap + cartHalfLen;
             int slots = Mathf.Max(1, reservedCartSlots);
             float reservedBackMeters = firstOffset + (cartLen + gap) * (slots - 1);
             // seed behind the current head pose
-            sim.SeedTapePrefixStraight(worldPoints[0], legFwd, reservedBackMeters + 0.1f);
+            sim.SeedTapePrefixStraight(worldPoints[0], legFwd, reservedBackMeters + SimTuning.TapeMarginMeters);
         }
 
         moveCoroutine = StartCoroutine(MoveRoutine(onCompleted));
@@ -114,8 +114,8 @@ public class TrainMover : MonoBehaviour
         offsets.Add(newCenterOffset);
         sim.SetCartOffsets(offsets);
         // Also expand tape capacity a bit if needed
-        float gap = cellSize / 10f;
-        sim.TapeCapacityMeters = Mathf.Max(sim.TapeCapacityMeters, newCenterOffset + (cellSize / 3f) * 0.5f + gap + 0.1f);
+        float gap = SimTuning.Gap(cellSize);
+        sim.TapeCapacityMeters = Mathf.Max(sim.TapeCapacityMeters, newCenterOffset + SimTuning.CartHalfLen(cellSize) + gap + SimTuning.TapeMarginMeters);
     }
 
     /// <summary>Seed a straight back tape at spawn so a stationary train is collidable before moving.</summary>
@@ -123,8 +123,9 @@ public class TrainMover : MonoBehaviour
     {
         // Ensure sim has matching sampling before seeding
         float assumedCell = cellSize > 0f ? cellSize : Mathf.Max(1e-5f, sampleStep * 8f);
-        float eps = Mathf.Max(1e-5f, 1e-4f * assumedCell);
-        sim.Configure(assumedCell, sampleStep: Mathf.Max(1e-5f, sampleStep), eps: eps, safetyGap: Mathf.Max(0f, safetyGap));
+        float eps = SimTuning.Eps(assumedCell);
+        float step = Mathf.Max(1e-5f, sampleStep); // keep caller’s step if provided
+        sim.Configure(assumedCell, sampleStep: step, eps: eps, safetyGap: Mathf.Max(0f, safetyGap));
         sim.SeedTapePrefixStraight(headPos, forwardWorld, Mathf.Max(0f, length));
     }
 
@@ -152,7 +153,7 @@ public class TrainMover : MonoBehaviour
         ListPool<Vector3>.Release(cartPos);
         ListPool<Vector3>.Release(cartTan);
 
-        AdvanceResult lastRes;
+        AdvanceResult lastRes = new AdvanceResult { Kind = AdvanceResultKind.EndOfPath };
 
         yield return null; // first rendered frame
 
@@ -299,15 +300,15 @@ public class TrainMover : MonoBehaviour
         if (offs != null) offsets.AddRange(offs);
 
         // configure core so it can answer immediately
-        float step = cellSize / 8f;
-        float eps = Mathf.Max(1e-5f, 1e-4f * cellSize);
+        float step = SimTuning.SampleStep(cellSize);
+        float eps = SimTuning.Eps(cellSize);
         sim.Configure(cellSize, sampleStep: step, eps: eps, safetyGap: Mathf.Max(0f, safetyGap));
         sim.SetCartOffsets(offsets);
 
         // ensure tape capacity covers the tail
-        float gap = cellSize / 10f;
-        float lastCenter = offsets.Count > 0 ? offsets[^1] : 0f;
-        sim.TapeCapacityMeters = lastCenter + (cellSize / 3f) * 0.5f + gap + 0.1f;
+        float gap = SimTuning.Gap(cellSize);
+        float lastCenter = (offsets.Count > 0) ? offsets[offsets.Count - 1] : 0f;
+        sim.TapeCapacityMeters = lastCenter + SimTuning.CartHalfLen(cellSize) + gap + SimTuning.TapeMarginMeters;
     }
 }
 

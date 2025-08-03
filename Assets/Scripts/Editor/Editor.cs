@@ -1,11 +1,12 @@
-﻿using UnityEngine;
-using UnityEditor;
+﻿using EditorUtils;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using Newtonsoft.Json;
-using static PlacedPartInstance;
-using EditorUtils;
 using System.Linq;
+using UnityEditor;
+using UnityEngine;
+using static PlacedPartInstance;
 
 
 public class TrackLevelEditorWindow : EditorWindow
@@ -31,7 +32,7 @@ public class TrackLevelEditorWindow : EditorWindow
     Vector2 gridOrigin = new Vector2(0, 0);
 
     LevelData levelData = new LevelData();
-    GameEditor gameEditor;
+    ScenarioEditor scenarioEditor;
 
     
     
@@ -78,7 +79,7 @@ public class TrackLevelEditorWindow : EditorWindow
             Debug.LogError("Could not find parts.json in Resources.");
         }
 
-        gameEditor = new GameEditor(levelData.gameData, cellManager);
+        scenarioEditor = new ScenarioEditor(levelData.gameData, cellManager);
 
         pathFinder = new PathFinder();
 
@@ -134,7 +135,7 @@ public class TrackLevelEditorWindow : EditorWindow
 
                 // Proceed with the original call
 
-                gameEditor.OnGridCellClicked(clickedPart,gx, gy, Event.current.button, GamePointType.Station, 0);
+                scenarioEditor.OnGridCellClicked(clickedPart,gx, gy, Event.current.button, GamePointType.Station, 0);
 
 
 
@@ -155,8 +156,8 @@ public class TrackLevelEditorWindow : EditorWindow
 
         if (currentMode == EditMode.Game)
         {
-            gameEditor.DrawStationsUI(gridRect, gameEditor.GetPoints(),cellManager,colors,cellSize);
-            gameEditor.DrawGamePoints(gridRect, cellSize, colors);
+            scenarioEditor.DrawStationsUI(gridRect, scenarioEditor.GetPoints(),cellManager,colors,cellSize);
+            scenarioEditor.DrawGamePoints(gridRect, cellSize, colors);
             Repaint();
             
             if (currPath != null)
@@ -231,6 +232,37 @@ public class TrackLevelEditorWindow : EditorWindow
         {
             EditorGUILayout.HelpBox("You need at least two stations (points) in GameData.", MessageType.Warning);
         }
+
+        EditorGUILayout.BeginHorizontal();
+
+        if (GUILayout.Button("Build Track"))
+        {
+            scenarioEditor.Sim_BuildTrack(levelData /*, isConsumablePredicate(optional)*/);
+        }
+        if (GUILayout.Button("Spawn Trains"))
+        {
+            scenarioEditor.Sim_SpawnTrains(levelData, gridOrigin, 0, 0, gridHeight*cellSize, cellSize);
+        }
+        if (GUILayout.Button("Run to Next"))
+        {
+            // pick a train GamePoint (e.g., the first train or one the user selected)
+            var trainPt = levelData.gameData.points.FirstOrDefault(p => p.type == GamePointType.Train);
+            if (trainPt != null)
+            {
+                var ev = scenarioEditor.Sim_RunToNextEvent(trainPt.id, scenarioEditor.SimMetersPerTick);
+                Debug.Log($"Sim result: {ev.Kind} train={ev.TrainId} blocker={ev.BlockerId} hit={ev.HitPos}");
+            }
+            else
+            {
+                Debug.LogWarning("No train points to run.");
+            }
+        }
+        if (GUILayout.Button("Reset"))
+        {
+            scenarioEditor.Sim_Reset();
+        }
+        EditorGUILayout.EndHorizontal();
+
     }
 
     private void DrawPartPicker()
@@ -697,9 +729,9 @@ public class TrackLevelEditorWindow : EditorWindow
             if (!string.IsNullOrEmpty(path))
             {
                 if (levelData.gameData == null)
-                    levelData.gameData = new GameModel();
+                    levelData.gameData = new ScenarioModel();
 
-                levelData.gameData.points = gameEditor.GetPoints();
+                levelData.gameData.points = scenarioEditor.GetPoints();
 
                 
                 File.WriteAllText(path, JsonConvert.SerializeObject(levelData, settings));
@@ -716,7 +748,7 @@ public class TrackLevelEditorWindow : EditorWindow
                 levelData = JsonConvert.DeserializeObject<LevelData>(json,settings);
 
                 // ADD THIS LINE:
-                 gameEditor.SetPoints(levelData.gameData.points);
+                 scenarioEditor.SetPoints(levelData.gameData.points);
 
                 // When editor loads a level:
                 cellManager = new CellOccupationManager(partsLibrary); // Create new cell manager
@@ -787,7 +819,7 @@ public class TrackLevelEditorWindow : EditorWindow
 
         cellManager.cellToPart.Clear(); // Remove all cell occupation mappings
 
-        gameEditor.ClearAll();
+        scenarioEditor.ClearAll();
     }
 
     private static readonly Color[] colors = new Color[]

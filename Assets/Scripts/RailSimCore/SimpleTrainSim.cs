@@ -20,7 +20,7 @@ namespace RailSimCore
     {
 
         private float explicitTrainLengthMeters = -1f; // < 0 means "use offsets"
-        private float PathEndTol => 1e-5f;            // default end tolerance
+        private float PathEndTol => SimTuning.Eps(CellSize);          // default end tolerance
 
         // ----- Config / tunables -----
         public float CellSize { get; private set; } = 1f;
@@ -58,8 +58,8 @@ namespace RailSimCore
         public void Configure(float cellSize, float sampleStep = -1f, float eps = -1f, float safetyGap = 0f)
         {
             CellSize = Mathf.Max(1e-6f, cellSize);
-            SampleStep = (sampleStep > 0f) ? sampleStep : CellSize / 8f;
-            Eps = (eps > 0f) ? eps : Mathf.Max(1e-6f, 1e-4f * CellSize);
+            SampleStep = (sampleStep > 0f) ? sampleStep : SimTuning.SampleStep(CellSize);
+            Eps = (eps > 0f) ? eps : SimTuning.Eps(CellSize);
             SafetyGap = Mathf.Max(0f, safetyGap);
         }
 
@@ -235,7 +235,7 @@ namespace RailSimCore
         {
             points = null;
 
-            float defaultHalfCartLen = CellSize / 6f;
+            float defaultHalfCartLen = SimTuning.CartHalfLen(CellSize);
             // derive base occupied length
             float occupiedLen = (explicitTrainLengthMeters >= 0f)
                 ? explicitTrainLengthMeters
@@ -295,8 +295,9 @@ namespace RailSimCore
             }
             if (s >= totalLen)
             {
-                Vector3 dirEnd = (pathPts[^1] - pathPts[^2]).normalized;
-                pos = pathPts[^1];
+                int n = pathPts.Count;
+                Vector3 dirEnd = (pathPts[n - 1] - pathPts[n - 2]).normalized;
+                pos = pathPts[n - 1];
                 rot = Quaternion.LookRotation(Vector3.forward, dirEnd);
                 return;
             }

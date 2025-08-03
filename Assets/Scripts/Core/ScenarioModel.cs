@@ -73,7 +73,7 @@ public class GamePoint
     public bool HasWaitingPeople => waitingPeople.Count > 0;
 }
 
-public class GameModel
+public class ScenarioModel
 {
     public List<GamePoint> points = new List<GamePoint>();
 }

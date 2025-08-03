@@ -1,18 +1,26 @@
-﻿using System.Collections.Generic;
+﻿using RailSimCore;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
 /// <summary>
-/// Editor-side manager for placing/cycling/removing GamePoints.
+/// Editor-side manager for placing/cycling/removing GamePoints,
+/// and (new) a thin host for SimWorld via SimController.
 /// </summary>
-public class GameEditor
+public class ScenarioEditor
 {
-    private readonly GameModel _data;
+    private readonly ScenarioModel _data;
     private readonly CellOccupationManager _cellMgr;
     private readonly int _colorCount;
 
-    public GameEditor(GameModel gameData, CellOccupationManager cellMgr, int colorCount = 3)
+    // ───────── NEW: simulation adapter ─────────
+    private readonly SimController _sim = new SimController();
+    public bool SimBuilt { get; private set; }
+    public bool TrainsSpawned { get; private set; }
+    public float SimMetersPerTick = 0.25f;
+
+    public ScenarioEditor(ScenarioModel gameData, CellOccupationManager cellMgr, int colorCount = 3)
     {
         _data = gameData;
         _cellMgr = cellMgr;
@@ -66,13 +74,13 @@ public class GameEditor
 
     private GamePointType NextType(GamePointType current)
     {
-        return current switch
+        switch (current)
         {
-            GamePointType.Station => GamePointType.Depot,
-            GamePointType.Depot => GamePointType.Train,
-            GamePointType.Train => GamePointType.Station,
-            _ => GamePointType.Station
-        };
+            case GamePointType.Station: return GamePointType.Depot;
+            case GamePointType.Depot: return GamePointType.Train;
+            case GamePointType.Train: return GamePointType.Station;
+            default: return GamePointType.Station;
+        }
     }
 
     /// <summary>
@@ -82,15 +90,16 @@ public class GameEditor
     private Anchor BuildAnchor(PlacedPartInstance part, int gx, int gy)
     {
         if (part == null || part.exits == null || part.exits.Count == 0)
-            return new Anchor { partId = part?.partId ?? "none", exitPin = -1, splineIndex = -1, t = 0f };
+            return new Anchor { partId = part != null ? part.partId : "none", exitPin = -1, splineIndex = -1, t = 0f };
 
-        // Find nearest exit pin by Manhattan or Euclidean distance
+        // Find nearest exit pin by grid distance
         var clickCell = new UnityEngine.Vector2Int(gx, gy);
         int bestPin = part.exits[0].exitIndex;
         float bestDist = float.PositiveInfinity;
 
-        foreach (var ex in part.exits)
+        for (int i = 0; i < part.exits.Count; i++)
         {
+            var ex = part.exits[i];
             float d = UnityEngine.Vector2Int.Distance(clickCell, ex.worldCell);
             if (d < bestDist)
             {
@@ -108,7 +117,6 @@ public class GameEditor
         if (resetIds) GamePoint.ResetIds();
     }
 
-
     public void DrawStationsUI(Rect gridRect, List<GamePoint> points, CellOccupationManager cellManager, Color[] colors, float cellSize)
     {
         const float panelW = 180f;
@@ -124,7 +132,7 @@ public class GameEditor
         {
             Vector2Int cell = new Vector2Int(p.gridX, p.gridY);
             string partId = "none";
-            if (cellManager != null && cellManager.cellToPart.TryGetValue(cell, out PlacedPartInstance partInst))
+            if (cellManager != null && cellManager.cellToPart != null && cellManager.cellToPart.TryGetValue(cell, out PlacedPartInstance partInst))
                 partId = partInst.partId;
 
             if (p.type == GamePointType.Station)
@@ -134,7 +142,7 @@ public class GameEditor
                 // Station label
                 GUI.Label(
                     new Rect(box.x, box.y, panelW, labelH),
-                    $"St {p.id} | Cl {cell} | Part: {partId}",
+                    "St " + p.id + " | Cl " + cell + " | Part: " + partId,
                     new GUIStyle(GUI.skin.label) { fontSize = 11, fontStyle = FontStyle.Bold });
 
                 // Add Person button
@@ -178,30 +186,29 @@ public class GameEditor
             {
                 // --- sizes (all UI pixels, not grid) ---
                 rowH = 18f;
-                float cartSize = cellSize / 3f;
+                float cartSizePx = cellSize / 3f;
                 float cartRowY = 42f;   // where the cart row starts (relative to box.y)
                 float addBtnH = 18f;
                 float spacingY = 6f;
 
                 // Dynamic panel height (header + dir/color + carts + button)
-                float trainH = cartRowY + cartSize + spacingY + addBtnH + 4f;
+                float trainH = cartRowY + cartSizePx + spacingY + addBtnH + 4f;
 
                 Rect box = new Rect(gridRect.xMax + spacing, y, panelW, trainH);
 
                 // Header
                 GUI.Label(new Rect(box.x, box.y, box.width, rowH),
-                          $"Train {p.id} | Cell {cell} | Part: {partId}",
+                          "Train " + p.id + " | Cell " + cell + " | Part: " + partId,
                           new GUIStyle(GUI.skin.label) { fontSize = 13, fontStyle = FontStyle.Bold });
 
                 // Direction button
                 Rect dirBtn = new Rect(box.x, box.y + rowH + 2f, 70f, rowH);
                 int dir = (int)p.direction;
-                string arrow = dir switch { 0 => "↑", 1 => "→", 2 => "↓", 3 => "←", _ => "?" };
-                if (GUI.Button(dirBtn, $"Dir {arrow}"))
+                string arrow = dir == 0 ? "↑" : (dir == 1 ? "→" : (dir == 2 ? "↓" : "←"));
+                if (GUI.Button(dirBtn, "Dir " + arrow))
                 {
                     dir = (dir + 1) % 4;
                     p.direction = (TrainDir)dir;
-                    //Repaint();
                 }
 
                 // Color cycle
@@ -209,17 +216,20 @@ public class GameEditor
                 if (GUI.Button(colBtn, "Color"))
                 {
                     p.colorIndex = (p.colorIndex + 1) % colors.Length;
-                    //Repaint();
                 }
 
                 // --- carts row ---
-                // Ensure list exists
                 if (p.initialCarts == null) p.initialCarts = new List<int>();
 
                 for (int j = 0; j < p.initialCarts.Count; j++)
                 {
                     int cIdx = p.initialCarts[j];
-                    Rect cartRect = new Rect(box.x + j * (cartSize + 4f), box.y + cartRowY, cartSize, cartSize);
+                    Rect cartRect = new Rect(
+                        box.x + j * (cartSizePx + 4f),
+                        box.y + cartRowY,
+                        cartSizePx,
+                        cartSizePx
+                    );
 
                     EditorGUI.DrawRect(cartRect, colors[cIdx % colors.Length]);
                     Handles.color = Color.black;
@@ -233,17 +243,15 @@ public class GameEditor
                             p.initialCarts.RemoveAt(j);
 
                         Event.current.Use();
-                        //Repaint();
                         break; // list changed
                     }
                 }
 
                 // Add Cart button
-                Rect addBtn = new Rect(box.x, box.y + cartRowY + cartSize + spacingY, 80f, addBtnH);
-                if (GUI.Button(addBtn, "Add Cart"))
+                Rect addBtn2 = new Rect(box.x, box.y + cartRowY + cartSizePx + spacingY, 80f, addBtnH);
+                if (GUI.Button(addBtn2, "Add Cart"))
                 {
                     p.initialCarts.Add(0);
-                    //Repaint();
                 }
 
                 y += trainH + spacing;
@@ -251,8 +259,7 @@ public class GameEditor
         }
     }
 
-
-    public void DrawGamePoints(Rect gridRect,float cellSize, Color[] colors)
+    public void DrawGamePoints(Rect gridRect, float cellSize, Color[] colors)
     {
         foreach (var p in GetPoints())
         {
@@ -264,7 +271,7 @@ public class GameEditor
                     {
                         Vector2 c = EditorUtils.GuiDrawHelpers.CellCenter(gridRect, cellSize, p.gridX, p.gridY);
                         EditorUtils.GuiDrawHelpers.DrawStationDisc(c, cellSize * 0.35f, col, Color.black);
-                        EditorUtils.GuiDrawHelpers.DrawCenteredLabel(c, $"S_{p.id}", 12, Color.black);
+                        EditorUtils.GuiDrawHelpers.DrawCenteredLabel(c, "S_" + p.id, 12, Color.black);
                         break;
                     }
 
@@ -275,8 +282,8 @@ public class GameEditor
 
                         // ---- sizes in cells ----
                         const float HEAD_LEN = 1.0f;    // exactly 1 cell long
-                        const float THICKNESS = 0.5f;    // exactly 0.5 cell thick
-                        const float CART_LEN = 1f / 3f;   // exactly 1/3 cell
+                        const float THICKNESS = 0.5f;   // exactly 0.5 cell thick
+                        const float CART_LEN = 1f / 3f; // exactly 1/3 cell
                         const float GAP_FRAC = 0.10f;   // 10% of cart length
 
                         // ---- convert to pixels ----
@@ -296,46 +303,31 @@ public class GameEditor
                         switch (p.direction)
                         {
                             case TrainDir.Up:
-                                headRect = new Rect(cc.x - thickPx * 0.5f,
-                                                    cc.y,
-                                                    thickPx,
-                                                    headLenPx);
+                                headRect = new Rect(cc.x - thickPx * 0.5f, cc.y, thickPx, headLenPx);
                                 baseStep = new Vector2(0f, cartLenPx + gapPx);
                                 vertical = true;
                                 break;
 
                             case TrainDir.Right:
-                                headRect = new Rect(cc.x - headLenPx,
-                                                    cc.y - thickPx * 0.5f,
-                                                    headLenPx,
-                                                    thickPx);
+                                headRect = new Rect(cc.x - headLenPx, cc.y - thickPx * 0.5f, headLenPx, thickPx);
                                 baseStep = new Vector2(-(cartLenPx + gapPx), 0f);
                                 vertical = false;
                                 break;
 
                             case TrainDir.Down:
-                                headRect = new Rect(cc.x - thickPx * 0.5f,
-                                                    cc.y - headLenPx,
-                                                    thickPx,
-                                                    headLenPx);
+                                headRect = new Rect(cc.x - thickPx * 0.5f, cc.y - headLenPx, thickPx, headLenPx);
                                 baseStep = new Vector2(0f, -(cartLenPx + gapPx));
                                 vertical = true;
                                 break;
 
                             case TrainDir.Left:
-                                headRect = new Rect(cc.x,
-                                                    cc.y - thickPx * 0.5f,
-                                                    headLenPx,
-                                                    thickPx);
+                                headRect = new Rect(cc.x, cc.y - thickPx * 0.5f, headLenPx, thickPx);
                                 baseStep = new Vector2(cartLenPx + gapPx, 0f);
                                 vertical = false;
                                 break;
 
                             default:
-                                headRect = new Rect(cc.x - headLenPx * 0.5f,
-                                                    cc.y - thickPx * 0.5f,
-                                                    headLenPx,
-                                                    thickPx);
+                                headRect = new Rect(cc.x - headLenPx * 0.5f, cc.y - thickPx * 0.5f, headLenPx, thickPx);
                                 baseStep = Vector2.zero;
                                 vertical = false;
                                 break;
@@ -380,7 +372,6 @@ public class GameEditor
                                 break;
                         }
 
-                        // each cart
                         for (int ci = 0; ci < p.initialCarts.Count; ci++)
                         {
                             Color cartCol = colors[p.initialCarts[ci] % colors.Length];
@@ -393,30 +384,76 @@ public class GameEditor
                             EditorUtils.GuiDrawHelpers.DrawTrainRect(cartRect, cartCol, outline, 1);
                         }
 
-                        // finally, label the head with arrow + ID
-                        string arrow = p.direction switch
-                        {
-                            TrainDir.Up => "↑",
-                            TrainDir.Right => "→",
-                            TrainDir.Down => "↓",
-                            TrainDir.Left => "←",
-                            _ => "?"
-                        };
-                        EditorUtils.GuiDrawHelpers.DrawCenteredLabel(headRect,$"T_{p.id} {arrow}",fontSize: 12,color: Color.black);
+                        // label the head with arrow + ID
+                        string arrow = (p.direction == TrainDir.Up) ? "↑" :
+                                       (p.direction == TrainDir.Right) ? "→" :
+                                       (p.direction == TrainDir.Down) ? "↓" : "←";
+                        EditorUtils.GuiDrawHelpers.DrawCenteredLabel(headRect, "T_" + p.id + " " + arrow, 12, Color.black);
 
                         break;
                     }
 
-
                 case GamePointType.Depot:
                     {
-                        Rect r = EditorUtils.GuiDrawHelpers.CellRectCentered(gridRect, cellSize, p.gridX, p.gridY,
-                                                                             1.0f, 1.0f);
+                        Rect r = EditorUtils.GuiDrawHelpers.CellRectCentered(gridRect, cellSize, p.gridX, p.gridY, 1.0f, 1.0f);
                         EditorUtils.GuiDrawHelpers.DrawDepotPoly(r, col, Color.black);
-                        EditorUtils.GuiDrawHelpers.DrawCenteredLabel(r, $"D_{p.id}");
+                        EditorUtils.GuiDrawHelpers.DrawCenteredLabel(r, "D_" + p.id);
                         break;
                     }
             }
         }
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // NEW: Simulation hooks (editor drives these)
+    // ─────────────────────────────────────────────────────────────
+
+    /// <summary>Build SimWorld.Track from the current LevelData.</summary>
+    public void Sim_BuildTrack(LevelData level, System.Func<PlacedPartInstance, bool> isConsumable = null)
+    {
+        _sim.BuildTrackDto(level, isConsumable);
+        SimBuilt = true;
+        TrainsSpawned = false;
+    }
+
+    /// <summary>Spawn all trains from the Scenario into SimWorld.</summary>
+    public void Sim_SpawnTrains(LevelData level, Vector2 worldOrigin, int minX, int minY, int gridH, float cellSize)
+    {
+        if (!SimBuilt)
+        {
+            Debug.LogWarning("ScenarioEditor: Sim track not built yet. Building with default settings.");
+            _sim.BuildTrackDto(level, null);
+            SimBuilt = true;
+        }
+
+        _sim.SpawnFromScenario(_data, level, worldOrigin, minX, minY, gridH, cellSize);
+        TrainsSpawned = true;
+    }
+
+    /// <summary>Advance a specific train (by GamePoint id) a fixed distance.</summary>
+    public AdvanceResult Sim_StepTrain(int gamePointId, float meters)
+    {
+        return _sim.StepByPointId(gamePointId, meters);
+    }
+
+    /// <summary>Run a specific train to the next event (Arrived/Blocked).</summary>
+    public SimEvent Sim_RunToNextEvent(int gamePointId, float metersPerTick)
+    {
+        if (metersPerTick <= 0f) metersPerTick = SimMetersPerTick;
+        return _sim.RunToNextEventByPointId(gamePointId, metersPerTick);
+    }
+
+    /// <summary>Get current sim state for optional gizmo drawing.</summary>
+    public List<TrainStateDto> Sim_GetState()
+    {
+        return _sim.GetStateSnapshot();
+    }
+
+    /// <summary>Reset the simulation (keeps scenario points untouched).</summary>
+    public void Sim_Reset()
+    {
+        _sim.Reset();
+        SimBuilt = false;
+        TrainsSpawned = false;
     }
 }

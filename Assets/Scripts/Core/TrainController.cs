@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using RailSimCore;
+using System.Collections.Generic;
 using UnityEngine;
 using static RailSimCore.Types;
 
@@ -66,8 +67,8 @@ public class TrainController : MonoBehaviour
         if (trainVisuals != null)
         {
             float targetLen = cellSize;          // local +X (forward/back)
-            float targetWid = cellSize / 3f;     // local +Y (side)
-            float targetHgt = cellSize / 3f;     // local +Z (up)
+            float targetWid = SimTuning.CartLen(cellSize);   // local +Y (side)
+            float targetHgt = SimTuning.CartLen(cellSize);     // local +Z (up)
 
             var mr = trainVisuals.GetComponent<MeshRenderer>();
             if (mr != null)
@@ -95,10 +96,10 @@ public class TrainController : MonoBehaviour
         initialForward = forwardWS;
 
         // Geometry cache
-        float cartSize = cellSize / 3f;
-        float gap = cellSize / 10f;
-        headHalfLength = cellSize * 0.5f;
-        cartHalfLength = cartSize * 0.5f;
+        float cartSize = SimTuning.CartLen(cellSize);
+        float gap = SimTuning.Gap(cellSize);
+        headHalfLength = SimTuning.HeadHalfLen(cellSize);
+        cartHalfLength = SimTuning.CartHalfLen(cellSize);
 
         float headBack = headHalfLength;
         float firstOffset = headBack + gap + cartHalfLength;
@@ -109,7 +110,7 @@ public class TrainController : MonoBehaviour
             return;
         }
 
-        // IMPORTANT: place carts in LOCAL space along -X (backwards along the train's length)
+        // IMPORTANT: place carts in LOCAL space along lopcal back -X (backwards along the train's length)
         Vector3 localBackward = Vector3.right;
 
         for (int j = 0; j < p.initialCarts.Count; j++)
@@ -134,19 +135,16 @@ public class TrainController : MonoBehaviour
             currCarts[i].transform.rotation = transform.rotation;
 
         // Tape length requirement (tail offset + small margin)
-        float tailOffsetFromHeadCenter = (currCarts.Count > 0)
-            ? cartCenterOffsets[^1] + cartHalfLength
-            : 0f;
-        requiredTapeLength = tailOffsetFromHeadCenter + gap + 0.1f;
+        float tailOffsetFromHeadCenter = (currCarts.Count > 0) ? cartCenterOffsets[cartCenterOffsets.Count - 1] + cartHalfLength : 0f;
+
+        requiredTapeLength = tailOffsetFromHeadCenter + gap + SimTuning.TapeMarginMeters;
 
 
         // Seed back tape so this train can be collided with before it ever moves
-        
-        float step = Mathf.Max(1e-5f, currCellSize / 8f);
-        
+                
         // make the train collidable BEFORE any movement
         mover.SetInitialCartOffsetsAndCapacity(cartCenterOffsets, currCellSize);
-        mover.SeedTapePrefixStraight(transform.position, initialForward, requiredTapeLength, currCellSize / 8f);
+        mover.SeedTapePrefixStraight(transform.position, initialForward, requiredTapeLength, SimTuning.SampleStep(currCellSize));
 
         GameManager.Instance.trains.Add(this);
         trainClickView.Init(TrainWasClicked);
@@ -187,9 +185,9 @@ public class TrainController : MonoBehaviour
         }
 
         // Geometry (match your Init rules)
-        float cartLength = currCellSize / 3f;   // cart 'size' along the path
-        float gap = currCellSize / 10f;
-        float halfCart = cartLength * 0.5f;
+        float cartLength = SimTuning.CartLen(currCellSize);   // cart 'size' along the path
+        float gap = SimTuning.Gap(currCellSize);
+        float halfCart = SimTuning.CartHalfLen(currCellSize);
 
         // Compute new cart center offset from head center
         float lastOffset = 0f;
@@ -223,7 +221,7 @@ public class TrainController : MonoBehaviour
         cartCenterOffsets.Add(newCenterOffset);
 
         // Keep required tape length up-to-date for the next leg start
-        requiredTapeLength = newCenterOffset + halfCart + gap + 0.1f;
+        requiredTapeLength = newCenterOffset + halfCart + gap + SimTuning.TapeMarginMeters;
 
         // Tell mover about the new offset so it will drive this cart on the next leg
         mover.AddCartOffset(newCenterOffset);

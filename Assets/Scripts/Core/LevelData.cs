@@ -12,7 +12,8 @@ public class LevelData
     public string levelName;                      // Level name
     public int width, height;                     // Grid dimensions
     public List<PlacedPartInstance> parts;        // All placed part instances
-    public GameModel gameData = new GameModel();                  // Game-specific info (may be subclassed)
+    public ScenarioModel gameData = new ScenarioModel();                  // still not game specific - but all the overlay on the tracks
+                                                                        //mainly points 
     public RouteModel routeModelData = new RouteModel();
 }
 
