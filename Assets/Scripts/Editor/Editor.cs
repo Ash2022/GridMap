@@ -7,6 +7,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using static PlacedPartInstance;
+using static SimController;
 
 
 public class TrackLevelEditorWindow : EditorWindow
@@ -237,7 +238,17 @@ public class TrackLevelEditorWindow : EditorWindow
 
         if (GUILayout.Button("Build Track"))
         {
-            scenarioEditor.Sim_BuildTrack(levelData /*, isConsumablePredicate(optional)*/);
+            var g = new GridContext
+            {
+                worldOriginBL = Vector2.zero, // or your actual world offset
+                minX = levelData.parts.Min(p => p.position.x),
+                minY = levelData.parts.Min(p => p.position.y),
+                gridH = gridHeight*cellSize,
+                cellSize = cellSize
+            };
+
+
+            scenarioEditor.Sim_BuildTrack(levelData, g /*, isConsumablePredicate(optional)*/);
         }
         if (GUILayout.Button("Spawn Trains"))
         {

@@ -15,6 +15,13 @@ public sealed class SimController
 
     public float DefaultMetersPerTick = 0.25f;
 
+    public struct GridContext
+    {
+        public Vector2 worldOriginBL; // world coords of the bottom-left of [minX,minY]
+        public int minX, minY, gridH;
+        public float cellSize;
+    }
+
     public void Reset()
     {
         _pointIdToTrainId.Clear();
@@ -26,7 +33,7 @@ public sealed class SimController
     /// Build TrackDto from LevelData placed parts. Assumes each PlacedPartInstance has worldSplines (world-space).
     /// If you need consumable segments, pass a predicate; otherwise all non-consumable.
     /// </summary>
-    public void BuildTrackDto(LevelData level, Func<PlacedPartInstance, bool> isConsumable = null)
+    public void BuildTrackDtoFromBaked(LevelData level, GridContext g, Func<PlacedPartInstance, bool> isConsumable = null)
     {
         if (level == null || level.parts == null)
             throw new ArgumentNullException("level or level.parts is null");
@@ -37,12 +44,23 @@ public sealed class SimController
         for (int i = 0; i < level.parts.Count; i++)
         {
             var part = level.parts[i];
-            if (part == null || part.worldSplines == null) continue;
+            if (part == null || part.bakedSplines == null) continue;
 
-            for (int s = 0; s < part.worldSplines.Count; s++)
+            for (int s = 0; s < part.bakedSplines.Count; s++)
             {
-                var pts = part.worldSplines[s];
-                if (pts == null || pts.Count < 2) continue;
+                var baked = part.bakedSplines[s];
+                var gridPts = baked.gridPts;           // << use grid-space baked points
+                if (gridPts == null || gridPts.Count < 2) continue;
+
+                // Convert each baked grid point -> world point
+                var worldPts = new List<Vector3>(gridPts.Count);
+                for (int k = 0; k < gridPts.Count; k++)
+                {
+                    var gp = gridPts[k]; // in cell units (continuous)
+                    float wx = g.worldOriginBL.x + (gp.x - g.minX) * g.cellSize;
+                    float wy = g.worldOriginBL.y + (g.gridH - gp.y) * g.cellSize; // Y flip
+                    worldPts.Add(new Vector3(wx, wy, 0f));
+                }
 
                 var key = new TrackSegmentKey
                 {
@@ -51,7 +69,7 @@ public sealed class SimController
                     T0 = 0f,
                     T1 = 1f
                 };
-                segments[key] = new Polyline(pts);
+                segments[key] = new Polyline(worldPts);
 
                 if (isConsumable != null && isConsumable(part))
                     consumable.Add(key);

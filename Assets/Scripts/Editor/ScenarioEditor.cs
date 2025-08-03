@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using static SimController;
 
 /// <summary>
 /// Editor-side manager for placing/cycling/removing GamePoints,
@@ -19,6 +20,8 @@ public class ScenarioEditor
     public bool SimBuilt { get; private set; }
     public bool TrainsSpawned { get; private set; }
     public float SimMetersPerTick = 0.25f;
+
+    GridContext gridContext;
 
     public ScenarioEditor(ScenarioModel gameData, CellOccupationManager cellMgr, int colorCount = 3)
     {
@@ -409,9 +412,11 @@ public class ScenarioEditor
     // ─────────────────────────────────────────────────────────────
 
     /// <summary>Build SimWorld.Track from the current LevelData.</summary>
-    public void Sim_BuildTrack(LevelData level, System.Func<PlacedPartInstance, bool> isConsumable = null)
+    public void Sim_BuildTrack(LevelData level,GridContext g,  System.Func<PlacedPartInstance, bool> isConsumable = null)
     {
-        _sim.BuildTrackDto(level, isConsumable);
+        gridContext = g;
+
+        _sim.BuildTrackDtoFromBaked(level, gridContext, isConsumable);
         SimBuilt = true;
         TrainsSpawned = false;
     }
@@ -422,7 +427,7 @@ public class ScenarioEditor
         if (!SimBuilt)
         {
             Debug.LogWarning("ScenarioEditor: Sim track not built yet. Building with default settings.");
-            _sim.BuildTrackDto(level, null);
+            _sim.BuildTrackDtoFromBaked(level, gridContext, null);
             SimBuilt = true;
         }
 
