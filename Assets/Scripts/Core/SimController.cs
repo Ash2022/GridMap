@@ -308,6 +308,137 @@ public sealed class SimController
         return Mathf.Sqrt(bestSq);
     }
 
+    public struct ValidationReport
+    {
+        public bool Ok;
+        public List<string> Lines;
+
+        public override string ToString()
+        {
+            return string.Join("\n", Lines ?? new List<string>());
+        }
+    }
+
+    /// <summary>
+    /// Validates: (1) track health, (2) train spawn alignment, (3) a basic motion step.
+    /// This method builds from baked splines to avoid relying on scene-time worldSplines.
+    /// It resets and re-spawns internally so results are deterministic.
+    /// </summary>
+    public ValidationReport ValidateFromBaked(LevelData level, GridContext g, ScenarioModel scenario, float metersPerTick = -1f)
+    {
+        var rep = new ValidationReport { Ok = true, Lines = new List<string>(64) };
+
+        // 0) Inputs & tuning
+        if (level == null) { rep.Ok = false; rep.Lines.Add("❌ LevelData is null."); return rep; }
+        if (scenario == null) { rep.Ok = false; rep.Lines.Add("❌ ScenarioModel is null."); return rep; }
+        float cellSize = g.cellSize;
+        float step = SimTuning.SampleStep(cellSize);
+        float eps = SimTuning.Eps(cellSize);
+        float tick = (metersPerTick > 0f) ? metersPerTick : DefaultMetersPerTick;
+
+        // 1) Reset, build, spawn
+        Reset();
+        BuildTrackDtoFromBaked(level, g);
+        if (_track.Segments == null || _track.Segments.Count == 0)
+        {
+            rep.Ok = false; rep.Lines.Add("❌ Track build produced 0 segments.");
+            return rep;
+        }
+        SpawnFromScenario(scenario, level, g.worldOriginBL, g.minX, g.minY, g.gridH, g.cellSize);
+        rep.Lines.Add($"✔ Track: {_track.Segments.Count} segments, consumable: {_track.Consumable?.Count ?? 0}");
+
+        // 2) Track health (segment stats)
+        int zeroLenSegs = 0;
+        float minSegLen = float.PositiveInfinity, maxSegLen = 0f, totalLen = 0f;
+        foreach (var kv in _track.Segments)
+        {
+            var pts = kv.Value.Points; // Polyline points in world space
+            if (pts == null || pts.Count < 2) { zeroLenSegs++; continue; }
+            for (int i = 0; i < pts.Count - 1; i++)
+            {
+                float d = Vector3.Distance(pts[i], pts[i + 1]);
+                if (d <= 1e-6f) zeroLenSegs++;
+                minSegLen = Mathf.Min(minSegLen, d);
+                maxSegLen = Mathf.Max(maxSegLen, d);
+                totalLen += d;
+            }
+        }
+        rep.Lines.Add($"✔ Track length ~ {totalLen:F3} m | seg step min {minSegLen:F5} max {maxSegLen:F3} | zero-ish segments: {zeroLenSegs}");
+        if (zeroLenSegs > 0) { rep.Ok = false; rep.Lines.Add("❌ Found degenerate (≈0 length) segments."); }
+
+        // Helper (same mapping used by Game)
+        Vector3 HeadWorldFromPoint(GamePoint p)
+        {
+            Vector2 worldCell;
+            if (p.anchor.exitPin >= 0 && p.part != null && p.part.exits != null && p.anchor.exitPin < p.part.exits.Count)
+            {
+                var exCell = p.part.exits[p.anchor.exitPin].worldCell;
+                worldCell = new Vector2(exCell.x, exCell.y);
+            }
+            else
+            {
+                worldCell = new Vector2(p.gridX, p.gridY);
+            }
+            float cellX = worldCell.x - g.minX + 0.5f;
+            float cellY = worldCell.y - g.minY + 0.5f;
+            Vector2 flipped = new Vector2(cellX, g.gridH - cellY);
+            return new Vector3(g.worldOriginBL.x + flipped.x * g.cellSize,
+                               g.worldOriginBL.y + flipped.y * g.cellSize,
+                               0f);
+        }
+
+        // 3) Spawn alignment (nearest distance head→polyline)
+        var trains = scenario.points?.FindAll(p => p != null && p.type == GamePointType.Train) ?? new List<GamePoint>();
+        if (trains.Count == 0) rep.Lines.Add("ℹ No trains in scenario.");
+
+        int misaligned = 0;
+        foreach (var p in trains)
+        {
+            Vector3 head = HeadWorldFromPoint(p);
+            float best = float.PositiveInfinity;
+            TrackSegmentKey? bestKey = null;
+
+            foreach (var kv in _track.Segments)
+            {
+                float d = DistanceToPolyline2D(kv.Value, head);
+                if (d < best)
+                {
+                    best = d; bestKey = kv.Key;
+                }
+            }
+
+            rep.Lines.Add($"• TrainPt {p.id} spawn dist→track = {best:F5} m {(bestKey.HasValue ? $"on {bestKey.Value.PartId}[{bestKey.Value.SplineIdx}]" : "")}");
+            if (best > 3f * eps) { misaligned++; }
+        }
+        if (misaligned > 0)
+        {
+            rep.Ok = false; rep.Lines.Add($"❌ {misaligned} train spawns are > 3*eps ({3f * eps:F6}) away from any track. Check mapping/gridH units or +0.5 usage.");
+        }
+        else if (trains.Count > 0)
+        {
+            rep.Lines.Add("✔ All train heads are aligned to track within tolerance.");
+        }
+
+        // 4) Basic motion sanity (single-tick advance for the first train)
+        if (trains.Count > 0)
+        {
+            var firstTrain = trains[0];
+            if (_pointIdToTrainId.TryGetValue(firstTrain.id, out var tid))
+            {
+                var r = _world.Step(tid, tick);
+                rep.Lines.Add($"• Move tick: allowed={r.Allowed:F4} kind={r.Kind} blocker={r.BlockerId}");
+                // Not a failure if blocked/end-of-path; most important is we didn't throw.
+            }
+            else
+            {
+                rep.Ok = false; rep.Lines.Add($"❌ Could not map GamePoint {firstTrain.id} to a spawned trainId.");
+            }
+        }
+
+        rep.Lines.Add(rep.Ok ? "✅ VALIDATION OK" : "⚠ VALIDATION HAS ISSUES");
+        return rep;
+    }
+
     /// <summary>Squared distance from point P to segment AB in 2D.</summary>
     private static float DistancePointToSegmentSq(Vector2 p, Vector2 a, Vector2 b)
     {
@@ -320,4 +451,6 @@ public sealed class SimController
         Vector2 proj = a + t * ab;
         return (p - proj).sqrMagnitude;
     }
+
+
 }

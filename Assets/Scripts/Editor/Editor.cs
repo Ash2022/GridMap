@@ -243,13 +243,29 @@ public class TrackLevelEditorWindow : EditorWindow
                 worldOriginBL = Vector2.zero, // or your actual world offset
                 minX = levelData.parts.Min(p => p.position.x),
                 minY = levelData.parts.Min(p => p.position.y),
-                gridH = gridHeight*cellSize,
+                gridH = gridHeight,
                 cellSize = cellSize
             };
 
 
             scenarioEditor.Sim_BuildTrack(levelData, g /*, isConsumablePredicate(optional)*/);
         }
+
+        if (GUILayout.Button("Validate"))
+        {
+            var g = new GridContext
+            {
+                worldOriginBL = Vector2.zero, // or your actual world offset
+                minX = levelData.parts.Min(p => p.position.x),
+                minY = levelData.parts.Min(p => p.position.y),
+                gridH = gridHeight,
+                cellSize = cellSize
+            };
+            var report = scenarioEditor.Sim_Validate(levelData, g); // simple wrapper that calls SimController.ValidateFromBaked
+            Debug.Log(report.ToString());
+        }
+
+
         if (GUILayout.Button("Spawn Trains"))
         {
             scenarioEditor.Sim_SpawnTrains(levelData, gridOrigin, 0, 0, gridHeight*cellSize, cellSize);

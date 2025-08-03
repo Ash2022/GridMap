@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using RailSimCore;
 using static SimController;
 
 /// <summary>
@@ -22,6 +23,8 @@ public class ScenarioEditor
     public float SimMetersPerTick = 0.25f;
 
     GridContext gridContext;
+    
+
 
     public ScenarioEditor(ScenarioModel gameData, CellOccupationManager cellMgr, int colorCount = 3)
     {
@@ -460,5 +463,18 @@ public class ScenarioEditor
         _sim.Reset();
         SimBuilt = false;
         TrainsSpawned = false;
+    }
+
+    /// <summary>
+    /// Runs the SimController validator using the editor's ScenarioModel (_data).
+    /// Pass the same GridContext you used to build/convert baked splines.
+    /// </summary>
+    /// <param name="level">Your LevelData (for parts/baked splines)</param>
+    /// <param name="g">GridContext (worldOrigin/minX/minY/gridH-in-cells/cellSize)</param>
+    /// <param name="metersPerTick">Optional override; if &lt;=0 uses SimController.DefaultMetersPerTick</param>
+    public SimController.ValidationReport Sim_Validate(LevelData level, /* if GridContext is top-level: */ GridContext g, float metersPerTick = -1f)
+    {
+        float mpt = (metersPerTick > 0f) ? metersPerTick : _sim.DefaultMetersPerTick;
+        return _sim.ValidateFromBaked(level, g, _data, mpt);
     }
 }
