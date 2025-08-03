@@ -30,6 +30,56 @@ public sealed class SimController
     }
 
     /// <summary>
+    /// Build TrackDto from runtime world-space splines (Game side).
+    /// Uses PlacedPartInstance.worldSplines (Vector3 in game world units, XY plane).
+    /// </summary>
+    public void BuildTrackDtoFromWorld(LevelData level, System.Func<PlacedPartInstance, bool> isConsumable = null)
+    {
+        if (level == null || level.parts == null)
+            throw new System.ArgumentNullException("level or level.parts is null");
+
+        var segments = new System.Collections.Generic.Dictionary<TrackSegmentKey, Polyline>();
+        var consumable = new System.Collections.Generic.HashSet<TrackSegmentKey>();
+
+        for (int i = 0; i < level.parts.Count; i++)
+        {
+            var part = level.parts[i];
+            if (part == null || part.worldSplines == null || part.worldSplines.Count == 0)
+                continue;
+
+            for (int s = 0; s < part.worldSplines.Count; s++)
+            {
+                var pts = part.worldSplines[s];
+                if (pts == null || pts.Count < 2) continue;
+
+                // Normalize Z to 0 (sim is 2D XY)
+                var worldPts = new System.Collections.Generic.List<UnityEngine.Vector3>(pts.Count);
+                for (int k = 0; k < pts.Count; k++)
+                {
+                    var v = pts[k];
+                    worldPts.Add(new UnityEngine.Vector3(v.x, v.y, 0f));
+                }
+
+                var key = new TrackSegmentKey
+                {
+                    PartId = string.IsNullOrEmpty(part.partId) ? ("part_" + i) : part.partId,
+                    SplineIdx = s,
+                    T0 = 0f,
+                    T1 = 1f
+                };
+
+                segments[key] = new Polyline(worldPts);
+
+                if (isConsumable != null && isConsumable(part))
+                    consumable.Add(key);
+            }
+        }
+
+        _track = new TrackDto { Segments = segments, Consumable = consumable };
+        _world.LoadTrack(_track);
+    }
+
+    /// <summary>
     /// Build TrackDto from LevelData placed parts. Assumes each PlacedPartInstance has worldSplines (world-space).
     /// If you need consumable segments, pass a predicate; otherwise all non-consumable.
     /// </summary>
@@ -452,5 +502,27 @@ public sealed class SimController
         return (p - proj).sqrMagnitude;
     }
 
+    // Spawn a single train directly (Game mirror path)
+    public int Mirror_SpawnTrain(SpawnSpec spec)
+    {
+        return _world.SpawnTrain(spec, /*segKey*/ null);
+    }
 
+    // Provide a leg (polyline) for a train by id
+    public void Mirror_StartLeg(int trainId, IList<Vector3> worldPoints)
+    {
+        _world.SetLegPolyline(trainId, new Polyline(worldPoints));
+    }
+
+    // Preview (no commit) how far we can move this tick
+    public AdvanceResult Mirror_PreviewAdvance(int trainId, float wantMeters, IList<int> otherTrainIds = null)
+    {
+        return _world.StepPreview(trainId, wantMeters, otherTrainIds);
+    }
+
+    // Commit movement (append to tape) and return new head pose
+    public void Mirror_CommitAdvance(int trainId, float allowed, out Vector3 headPos, out Vector3 headTan)
+    {
+        _world.CommitAdvance(trainId, allowed, out headPos, out headTan);
+    }
 }

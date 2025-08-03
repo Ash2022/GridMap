@@ -148,6 +148,8 @@ public class TrainController : MonoBehaviour
 
         GameManager.Instance.trains.Add(this);
         trainClickView.Init(TrainWasClicked);
+
+        MirrorManager.Instance?.RegisterTrain(this, transform.position, initialForward, cartCenterOffsets, requiredTapeLength, safetyGap: 0f);
     }
 
     private void TrainWasClicked()

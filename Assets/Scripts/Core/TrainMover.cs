@@ -93,6 +93,8 @@ public class TrainMover : MonoBehaviour
             sim.SeedTapePrefixStraight(worldPoints[0], legFwd, reservedBackMeters + SimTuning.TapeMarginMeters);
         }
 
+        MirrorManager.Instance?.StartLeg(GetComponent<TrainController>(), worldPoints);
+
         moveCoroutine = StartCoroutine(MoveRoutine(onCompleted));
     }
 
@@ -154,6 +156,7 @@ public class TrainMover : MonoBehaviour
         ListPool<Vector3>.Release(cartTan);
 
         AdvanceResult lastRes = new AdvanceResult { Kind = AdvanceResultKind.EndOfPath };
+        var myCtrl = GetComponent<TrainController>();
 
         yield return null; // first rendered frame
 
@@ -187,8 +190,14 @@ public class TrainMover : MonoBehaviour
                 }
 
                 int GetId(SimpleTrainSim s) => (idMap != null && idMap.TryGetValue(s, out var id)) ? id : 0;
+
+                // Game-side computation
                 var res = sim.ComputeAllowedAdvance(want, others, getId: GetId);
                 float allowed = res.Allowed;
+
+                // Mirror preview + compare (editor/dev only manager)
+                var mirrorRes = MirrorManager.Instance != null ? MirrorManager.Instance.Preview(myCtrl, want) : default;
+                MirrorManager.Instance?.CompareTickResults($"T{myCtrl.TrainId}", res, mirrorRes);
 
                 // Debug gizmos
                 if (collisionDebug)
@@ -199,7 +208,7 @@ public class TrainMover : MonoBehaviour
                         Debug.Log($"[TrainMover] BLOCKED by Train {sim.LastBlockerId}  allowed={allowed:F3} m");
                 }
 
-                // Apply movement
+                // Apply movement in game
                 if (allowed > 1e-6f)
                 {
                     sim.CommitAdvance(allowed, out var headPos, out var headTan);
@@ -217,25 +226,15 @@ public class TrainMover : MonoBehaviour
                     ListPool<Vector3>.Release(cartPos);
                     ListPool<Vector3>.Release(cartTan);
                 }
-               
 
-                // End condition: reached end of leg (no more distance to consume)
-                // We test by sampling head at an epsilon beyond and comparing to allowed==0 for multiple frames.
-                // Simpler: if the last SampleForward position equals final path point and allowed < want by tiny epsilon, break.
-                // Here we break when advancing further is impossible and we're already at/near the end.
-                // (If you prefer, add a 'PathLength' getter to SimpleTrainSim and compare SHead to it.)
-                if (allowed < 1e-6f && !collisionsEnabled) // only if no blocker; otherwise we’re paused at a block
-                {
-                    // Optional: refine end-of-leg detection by exposing PathLength from the core.
-                    // For now, we rely on your route handover to start the next leg.
-                }
+                // Commit same advance to mirror so it stays in lockstep
+                MirrorManager.Instance?.Commit(myCtrl, allowed, out _, out _);
 
                 lastRes = res;
 
                 // End-of-leg?
                 if (res.Kind == AdvanceResultKind.EndOfPath || res.Kind == AdvanceResultKind.Blocked || sim.AtEnd())
                     break;
-
             }
 
             yield return null;
@@ -251,10 +250,10 @@ public class TrainMover : MonoBehaviour
             else if (lastRes.Kind == AdvanceResultKind.Blocked)
                 onCompleted(new MoveCompletion { Outcome = MoveOutcome.Blocked, BlockerId = lastRes.BlockerId, HitPos = lastRes.HitPos });
             else
-                onCompleted(new MoveCompletion { Outcome = MoveOutcome.Arrived }); // fallback if you broke by AtEnd()
+                onCompleted(new MoveCompletion { Outcome = MoveOutcome.Arrived });
         }
-
     }
+
 
     // ─────────────────────────────────────────────────────────────────────────────
     // Gizmos

@@ -245,6 +245,8 @@ public class LevelVisualizer : MonoBehaviour
         //DrawGlobalSplinePath(level.parts);
 
         GameManager.Instance.level = level;
+
+        MirrorManager.Instance?.InitFromLevel(level, cellSize);
     }
 
     /// <summary>  

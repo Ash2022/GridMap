@@ -119,15 +119,17 @@ namespace RailSimCore
         public int SpawnTrain(SpawnSpec spec, TrackSegmentKey? segmentKey = null)
         {
             if (spec == null) throw new ArgumentNullException(nameof(spec));
-            if (spec.Path == null || spec.Path.Points == null || spec.Path.Points.Count < 2)
-                throw new ArgumentException("SpawnSpec.Path must contain at least 2 points.", nameof(spec));
 
             int id = nextId++;
 
             var sim = new SimpleTrainSim();
-            float cellSize = (spec.CellSizeHint > 0f) ? spec.CellSizeHint : MeasureCell(spec.Path);
+            float cellSize = (spec.CellSizeHint > 0f) ? spec.CellSizeHint : 1f;
             sim.Configure(cellSize, sampleStep: -1f, eps: -1f, safetyGap: spec.SafetyGap);
-            sim.LoadLeg(spec.Path.Points);
+
+            // Defer leg load if Path is null (mirror workflow)
+            if (spec.Path != null && spec.Path.Points != null && spec.Path.Points.Count >= 2)
+                sim.LoadLeg(spec.Path.Points);
+
             sim.SetCartOffsets(spec.CartOffsets);
             if (spec.TapeSeedLen > 0f)
                 sim.SeedTapePrefixStraight(spec.HeadPos, spec.HeadForward, spec.TapeSeedLen);
@@ -270,6 +272,59 @@ namespace RailSimCore
             int segs = Mathf.Max(1, p.Points.Count - 1);
             float avg = total / segs;
             return Mathf.Max(1e-3f, avg);
+        }
+
+        internal void SetLegPolyline(int trainId, Polyline polyline)
+        {
+            if (polyline == null || polyline.Points == null || polyline.Points.Count < 2)
+                throw new ArgumentException("polyline must have at least 2 points.", nameof(polyline));
+
+            var tr = GetRecord(trainId);
+            tr.Sim.LoadLeg(polyline.Points);
+            // Note: we don't touch tr.CurrentKey here (unknown for ad-hoc legs).
+        }
+
+        internal AdvanceResult StepPreview(int trainId, float wantMeters, IList<int> otherTrainIds)
+        {
+            var tr = GetRecord(trainId);
+
+            // Build "others" from requested ids (or all except self if null)
+            scratchOthers.Clear();
+            scratchIdMap.Clear();
+
+            if (otherTrainIds != null)
+            {
+                for (int i = 0; i < otherTrainIds.Count; i++)
+                {
+                    int oid = otherTrainIds[i];
+                    if (oid == trainId) continue;
+                    if (trains.TryGetValue(oid, out var rec))
+                    {
+                        scratchOthers.Add(rec.Sim);
+                        scratchIdMap[rec.Sim] = oid;
+                    }
+                }
+            }
+            else
+            {
+                foreach (var kv in trains)
+                {
+                    if (kv.Key == trainId) continue;
+                    scratchOthers.Add(kv.Value.Sim);
+                    scratchIdMap[kv.Value.Sim] = kv.Key;
+                }
+            }
+
+            int GetId(SimpleTrainSim s) => scratchIdMap.TryGetValue(s, out var id) ? id : 0;
+
+            return tr.Sim.ComputeAllowedAdvance(Mathf.Max(0f, wantMeters), scratchOthers, getId: GetId);
+        }
+
+        internal void CommitAdvance(int trainId, float allowed, out Vector3 headPos, out Vector3 headTan)
+        {
+            var tr = GetRecord(trainId);
+            tr.Sim.CommitAdvance(Mathf.Max(0f, allowed), out headPos, out headTan);
+            // (No auto-consume here; Step(...) handles that when you run the full tick path.)
         }
     }
 }
