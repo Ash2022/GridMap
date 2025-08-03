@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using static RailSimCore.Types;
 
 public class TrainController : MonoBehaviour
 {
@@ -142,9 +143,10 @@ public class TrainController : MonoBehaviour
         // Seed back tape so this train can be collided with before it ever moves
         
         float step = Mathf.Max(1e-5f, currCellSize / 8f);
-        mover.SeedTapePrefixStraight(transform.position, initialForward, requiredTapeLength, step);
         
-
+        // make the train collidable BEFORE any movement
+        mover.SetInitialCartOffsetsAndCapacity(cartCenterOffsets, currCellSize);
+        mover.SeedTapePrefixStraight(transform.position, initialForward, requiredTapeLength, currCellSize / 8f);
 
         GameManager.Instance.trains.Add(this);
         trainClickView.Init(TrainWasClicked);
@@ -158,12 +160,21 @@ public class TrainController : MonoBehaviour
     public void MoveAlongPath(List<Vector3> worldPoints)
     {
         if (mover != null)
-            mover.MoveAlongPath(worldPoints,currCarts, currCellSize, TrainReachedDestination);
+            mover.MoveAlongPath(worldPoints,currCarts, currCellSize, OnMoveCompleted);
     }
 
-    private void TrainReachedDestination()
+    private void OnMoveCompleted(MoveCompletion r)
     {
-        //OnArrivedStation_AddCart();
+        if (r.Outcome == MoveOutcome.Arrived)
+        {
+            //OnArrivedStation_AddCart(); // your existing arrival logic
+        }
+        else if (r.Outcome == MoveOutcome.Blocked)
+        {
+            // Collision handling: freeze input, show UI, log, etc.
+            Debug.Log($"Train {CurrentPointModel.id} blocked by Train {r.BlockerId} at {r.HitPos}");
+            // TODO: puzzle fail/retry flow
+        }
     }
 
     public void OnArrivedStation_AddCart()
