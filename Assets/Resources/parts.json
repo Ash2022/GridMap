@@ -5,31 +5,70 @@
     "gridHeight": 1,
     "displaySprite": "Sprites/Track_Straight.png",
     "connections": [
-      { "id": 0, "direction": 0, "gridOffset": [0, 0] },
-      { "id": 1, "direction": 2, "gridOffset": [0, 0] }
+      {
+        "id": 0,
+        "direction": 0,
+        "gridOffset": [
+          0,
+          0
+        ]
+      },
+      {
+        "id": 1,
+        "direction": 2,
+        "gridOffset": [
+          0,
+          0
+        ]
+      }
     ],
     "allowedPathsGroups": [
       {
         "allowedPaths": [
-          { "entryConnectionId": 0, "exitConnectionId": 1 },
-          { "entryConnectionId": 1, "exitConnectionId": 0 }
+          {
+            "entryConnectionId": 0,
+            "exitConnectionId": 1,
+            "length": 0.0
+          },
+          {
+            "entryConnectionId": 1,
+            "exitConnectionId": 0,
+            "length": 0.0
+          }
         ]
       }
     ],
     "originalSplineTemplates": [
       [
-        [0.5, 0.0],
-        [0.5, 1.0]
+        [
+          0.5,
+          0.0
+        ],
+        [
+          0.5,
+          1.0
+        ]
       ]
     ],
     "splineTemplates": [
       [
-        [0.5, 0.0],
-        [0.5, 1.0]
+        [
+          0.5,
+          0.0
+        ],
+        [
+          0.5,
+          1.0
+        ]
       ]
     ],
     "solidCells": [
-      { "x": 0, "y": 0 }
+      {
+        "x": 0,
+        "y": 0,
+        "magnitude": 0.0,
+        "sqrMagnitude": 0
+      }
     ]
   },
   {
@@ -38,31 +77,74 @@
     "gridHeight": 1,
     "displaySprite": "Sprites/Track_CurveRight.png",
     "connections": [
-      { "id": 0, "direction": 2, "gridOffset": [0, 0] },
-      { "id": 1, "direction": 1, "gridOffset": [0, 0] }
+      {
+        "id": 0,
+        "direction": 2,
+        "gridOffset": [
+          0,
+          0
+        ]
+      },
+      {
+        "id": 1,
+        "direction": 1,
+        "gridOffset": [
+          0,
+          0
+        ]
+      }
     ],
     "allowedPathsGroups": [
       {
         "allowedPaths": [
-          { "entryConnectionId": 0, "exitConnectionId": 1 },
-          { "entryConnectionId": 1, "exitConnectionId": 0 }
+          {
+            "entryConnectionId": 0,
+            "exitConnectionId": 1,
+            "length": 0.0
+          },
+          {
+            "entryConnectionId": 1,
+            "exitConnectionId": 0,
+            "length": 0.0
+          }
         ]
       }
     ],
     "originalSplineTemplates": [
       [
-        [0.5, 1.0],
-        [1.0, 0.5]
+        [
+          0.5,
+          1.0
+        ],
+        [
+          1.0,
+          0.5
+        ]
       ]
     ],
     "splineTemplates": [
       [
-        [0.5, 1.0],
-        [1.0, 0.5]
+        [
+          0.5,
+          1.0
+        ],
+        [
+          0.6640625,
+          0.6640625
+        ],
+        [
+          1.0,
+          0.5
+        ]
       ]
     ],
     "solidCells": [
-      { "x": 0, "y": 0 }
+      {
+        "x": 0,
+        "y": 0,
+        "magnitude": 0.0,
+        "sqrMagnitude": 0
+      }
     ]
   },
   {
@@ -71,47 +153,120 @@
     "gridHeight": 1,
     "displaySprite": "Sprites/Track_XCrossing.png",
     "connections": [
-      { "id": 0, "direction": 0, "gridOffset": [0, 0] },
-      { "id": 1, "direction": 1, "gridOffset": [0, 0] },
-      { "id": 2, "direction": 2, "gridOffset": [0, 0] },
-      { "id": 3, "direction": 3, "gridOffset": [0, 0] }
+      {
+        "id": 0,
+        "direction": 0,
+        "gridOffset": [
+          0,
+          0
+        ]
+      },
+      {
+        "id": 1,
+        "direction": 1,
+        "gridOffset": [
+          0,
+          0
+        ]
+      },
+      {
+        "id": 2,
+        "direction": 2,
+        "gridOffset": [
+          0,
+          0
+        ]
+      },
+      {
+        "id": 3,
+        "direction": 3,
+        "gridOffset": [
+          0,
+          0
+        ]
+      }
     ],
     "allowedPathsGroups": [
       {
         "allowedPaths": [
-          { "entryConnectionId": 0, "exitConnectionId": 2 },
-          { "entryConnectionId": 2, "exitConnectionId": 0 }
+          {
+            "entryConnectionId": 0,
+            "exitConnectionId": 2,
+            "length": 0.0
+          },
+          {
+            "entryConnectionId": 2,
+            "exitConnectionId": 0,
+            "length": 0.0
+          }
         ]
       },
       {
         "allowedPaths": [
-          { "entryConnectionId": 1, "exitConnectionId": 3 },
-          { "entryConnectionId": 3, "exitConnectionId": 1 }
+          {
+            "entryConnectionId": 1,
+            "exitConnectionId": 3,
+            "length": 0.0
+          },
+          {
+            "entryConnectionId": 3,
+            "exitConnectionId": 1,
+            "length": 0.0
+          }
         ]
       }
     ],
     "originalSplineTemplates": [
       [
-        [0.5, 0.0],
-        [0.5, 1.0]
+        [
+          0.5,
+          0.0
+        ],
+        [
+          0.5,
+          1.0
+        ]
       ],
       [
-        [1.0, 0.5],
-        [0.0, 0.5]
+        [
+          1.0,
+          0.5
+        ],
+        [
+          0.0,
+          0.5
+        ]
       ]
     ],
     "splineTemplates": [
       [
-        [0.5, 0.0],
-        [0.5, 1.0]
+        [
+          0.5,
+          0.0
+        ],
+        [
+          0.5,
+          1.0
+        ]
       ],
       [
-        [1.0, 0.5],
-        [0.0, 0.5]
+        [
+          1.0,
+          0.5
+        ],
+        [
+          0.0,
+          0.5
+        ]
       ]
     ],
     "solidCells": [
-      { "x": 0, "y": 0 }
+      {
+        "x": 0,
+        "y": 0,
+        "magnitude": 0.0,
+        "sqrMagnitude": 0
+      }
     ]
   },
   {
@@ -120,35 +275,98 @@
     "gridHeight": 2,
     "displaySprite": "Sprites/Track_CurveRight2x2.png",
     "connections": [
-      { "id": 0, "direction": 2, "gridOffset": [0, 1] },
-      { "id": 1, "direction": 1, "gridOffset": [1, 0] }
+      {
+        "id": 0,
+        "direction": 2,
+        "gridOffset": [
+          0,
+          1
+        ]
+      },
+      {
+        "id": 1,
+        "direction": 1,
+        "gridOffset": [
+          1,
+          0
+        ]
+      }
     ],
     "allowedPathsGroups": [
       {
         "allowedPaths": [
-          { "entryConnectionId": 0, "exitConnectionId": 1 },
-          { "entryConnectionId": 1, "exitConnectionId": 0 }
+          {
+            "entryConnectionId": 0,
+            "exitConnectionId": 1,
+            "length": 0.0
+          },
+          {
+            "entryConnectionId": 1,
+            "exitConnectionId": 0,
+            "length": 0.0
+          }
         ]
       }
     ],
     "originalSplineTemplates": [
       [
-        [0.5, 2.0],
-        [0.828125, 0.890625],
-        [2.0, 0.5]
+        [
+          0.5,
+          2.0
+        ],
+        [
+          0.828125,
+          0.890625
+        ],
+        [
+          2.0,
+          0.5
+        ]
       ]
     ],
     "splineTemplates": [
       [
-        [0.5, 2.0],
-        [0.828125, 0.890625],
-        [2.0, 0.5]
+        [
+          0.5,
+          2.0
+        ],
+        [
+          0.5090637,
+          1.44480228
+        ],
+        [
+          0.828125,
+          0.890625
+        ],
+        [
+          1.4296875,
+          0.5703125
+        ],
+        [
+          2.0,
+          0.5
+        ]
       ]
     ],
     "solidCells": [
-      { "x": 0, "y": 0 },
-      { "x": 0, "y": 1 },
-      { "x": 1, "y": 0 }
+      {
+        "x": 0,
+        "y": 0,
+        "magnitude": 0.0,
+        "sqrMagnitude": 0
+      },
+      {
+        "x": 0,
+        "y": 1,
+        "magnitude": 1.0,
+        "sqrMagnitude": 1
+      },
+      {
+        "x": 1,
+        "y": 0,
+        "magnitude": 1.0,
+        "sqrMagnitude": 1
+      }
     ]
   },
   {
@@ -157,47 +375,122 @@
     "gridHeight": 2,
     "displaySprite": "Sprites/Track_ThreeWay.png",
     "connections": [
-      { "id": 0, "direction": 2, "gridOffset": [0, 1] },
-      { "id": 1, "direction": 0, "gridOffset": [0, 0] },
-      { "id": 2, "direction": 1, "gridOffset": [0, 0] }
+      {
+        "id": 0,
+        "direction": 2,
+        "gridOffset": [
+          0,
+          1
+        ]
+      },
+      {
+        "id": 1,
+        "direction": 0,
+        "gridOffset": [
+          0,
+          0
+        ]
+      },
+      {
+        "id": 2,
+        "direction": 1,
+        "gridOffset": [
+          0,
+          0
+        ]
+      }
     ],
     "allowedPathsGroups": [
       {
         "allowedPaths": [
-          { "entryConnectionId": 1, "exitConnectionId": 0 },
-          { "entryConnectionId": 0, "exitConnectionId": 1 }
+          {
+            "entryConnectionId": 1,
+            "exitConnectionId": 0,
+            "length": 0.0
+          },
+          {
+            "entryConnectionId": 0,
+            "exitConnectionId": 1,
+            "length": 0.0
+          }
         ]
       },
       {
         "allowedPaths": [
-          { "entryConnectionId": 2, "exitConnectionId": 0 },
-          { "entryConnectionId": 0, "exitConnectionId": 2 }
+          {
+            "entryConnectionId": 2,
+            "exitConnectionId": 0,
+            "length": 0.0
+          },
+          {
+            "entryConnectionId": 0,
+            "exitConnectionId": 2,
+            "length": 0.0
+          }
         ]
       }
     ],
     "originalSplineTemplates": [
       [
-        [0.5, 0.0],
-        [0.5, 2.0]
+        [
+          0.5,
+          0.0
+        ],
+        [
+          0.5,
+          2.0
+        ]
       ],
       [
-        [1.0, 0.5],
-        [0.5, 2.0]
+        [
+          1.0,
+          0.5
+        ],
+        [
+          0.5,
+          2.0
+        ]
       ]
     ],
     "splineTemplates": [
       [
-        [0.5, 0.0],
-        [0.5, 2.0]
+        [
+          0.5,
+          0.0
+        ],
+        [
+          0.5,
+          2.0
+        ]
       ],
       [
-        [1.0, 0.5],
-        [0.5, 2.0]
+        [
+          1.0,
+          0.5
+        ],
+        [
+          0.5203125,
+          0.8609376
+        ],
+        [
+          0.5,
+          2.0
+        ]
       ]
     ],
     "solidCells": [
-      { "x": 0, "y": 0 },
-      { "x": 0, "y": 1 }
+      {
+        "x": 0,
+        "y": 0,
+        "magnitude": 0.0,
+        "sqrMagnitude": 0
+      },
+      {
+        "x": 0,
+        "y": 1,
+        "magnitude": 1.0,
+        "sqrMagnitude": 1
+      }
     ]
   },
   {
@@ -206,47 +499,122 @@
     "gridHeight": 2,
     "displaySprite": "Sprites/Track_ThreeWay_Mirrored.png",
     "connections": [
-      { "id": 0, "direction": 2, "gridOffset": [0, 1] },
-      { "id": 1, "direction": 0, "gridOffset": [0, 0] },
-      { "id": 2, "direction": 3, "gridOffset": [0, 0] }
+      {
+        "id": 0,
+        "direction": 2,
+        "gridOffset": [
+          0,
+          1
+        ]
+      },
+      {
+        "id": 1,
+        "direction": 0,
+        "gridOffset": [
+          0,
+          0
+        ]
+      },
+      {
+        "id": 2,
+        "direction": 3,
+        "gridOffset": [
+          0,
+          0
+        ]
+      }
     ],
     "allowedPathsGroups": [
       {
         "allowedPaths": [
-          { "entryConnectionId": 1, "exitConnectionId": 0 },
-          { "entryConnectionId": 0, "exitConnectionId": 1 }
+          {
+            "entryConnectionId": 1,
+            "exitConnectionId": 0,
+            "length": 0.0
+          },
+          {
+            "entryConnectionId": 0,
+            "exitConnectionId": 1,
+            "length": 0.0
+          }
         ]
       },
       {
         "allowedPaths": [
-          { "entryConnectionId": 2, "exitConnectionId": 0 },
-          { "entryConnectionId": 0, "exitConnectionId": 2 }
+          {
+            "entryConnectionId": 2,
+            "exitConnectionId": 0,
+            "length": 0.0
+          },
+          {
+            "entryConnectionId": 0,
+            "exitConnectionId": 2,
+            "length": 0.0
+          }
         ]
       }
     ],
     "originalSplineTemplates": [
       [
-        [0.5, 0.0],
-        [0.5, 2.0]
+        [
+          0.5,
+          0.0
+        ],
+        [
+          0.5,
+          2.0
+        ]
       ],
       [
-        [0.0, 0.5],
-        [0.5, 2.0]
+        [
+          0.0,
+          0.5
+        ],
+        [
+          0.5,
+          2.0
+        ]
       ]
     ],
     "splineTemplates": [
       [
-        [0.5, 0.0],
-        [0.5, 2.0]
+        [
+          0.5,
+          0.0
+        ],
+        [
+          0.5,
+          2.0
+        ]
       ],
       [
-        [0.0, 0.5],
-        [0.5, 2.0]
+        [
+          0.0,
+          0.5
+        ],
+        [
+          0.4921875,
+          0.8984375
+        ],
+        [
+          0.5,
+          2.0
+        ]
       ]
     ],
     "solidCells": [
-      { "x": 0, "y": 0 },
-      { "x": 0, "y": 1 }
+      {
+        "x": 0,
+        "y": 0,
+        "magnitude": 0.0,
+        "sqrMagnitude": 0
+      },
+      {
+        "x": 0,
+        "y": 1,
+        "magnitude": 1.0,
+        "sqrMagnitude": 1
+      }
     ]
   },
   {
@@ -255,176 +623,474 @@
     "gridHeight": 2,
     "displaySprite": "Sprites/Track_ThreeWay2x2.png",
     "connections": [
-      { "id": 0, "direction": 0, "gridOffset": [0, 0] },
-      { "id": 1, "direction": 2, "gridOffset": [0, 1] },
-      { "id": 2, "direction": 0, "gridOffset": [1, 0] }
+      {
+        "id": 0,
+        "direction": 0,
+        "gridOffset": [
+          0,
+          0
+        ]
+      },
+      {
+        "id": 1,
+        "direction": 2,
+        "gridOffset": [
+          0,
+          1
+        ]
+      },
+      {
+        "id": 2,
+        "direction": 0,
+        "gridOffset": [
+          1,
+          0
+        ]
+      }
     ],
     "allowedPathsGroups": [
       {
         "allowedPaths": [
-          { "entryConnectionId": 0, "exitConnectionId": 1 },
-          { "entryConnectionId": 1, "exitConnectionId": 0 }
+          {
+            "entryConnectionId": 0,
+            "exitConnectionId": 1,
+            "length": 0.0
+          },
+          {
+            "entryConnectionId": 1,
+            "exitConnectionId": 0,
+            "length": 0.0
+          }
         ]
       },
       {
         "allowedPaths": [
-          { "entryConnectionId": 2, "exitConnectionId": 1 },
-          { "entryConnectionId": 1, "exitConnectionId": 2 }
-          ]
+          {
+            "entryConnectionId": 2,
+            "exitConnectionId": 1,
+            "length": 0.0
+          },
+          {
+            "entryConnectionId": 1,
+            "exitConnectionId": 2,
+            "length": 0.0
+          }
+        ]
       }
     ],
     "originalSplineTemplates": [
       [
-        [0.5, 0.0],
-        [0.5, 2.0]
+        [
+          0.5,
+          0.0
+        ],
+        [
+          0.5,
+          2.0
+        ]
       ],
       [
-        [1.5, 0.0],
-        [0.5, 2.0]
+        [
+          1.5,
+          0.0
+        ],
+        [
+          0.5,
+          2.0
+        ]
       ]
     ],
     "splineTemplates": [
       [
-        [0.5, 0.0],
-        [0.5, 2.0]
+        [
+          0.5,
+          0.0
+        ],
+        [
+          0.5,
+          2.0
+        ]
       ],
       [
-        [1.5, 0.0],
-        [0.5, 2.0]
+        [
+          1.5,
+          0.0
+        ],
+        [
+          1.303125,
+          0.721874952
+        ],
+        [
+          0.504340768,
+          1.07103443
+        ],
+        [
+          0.5,
+          2.0
+        ]
       ]
     ],
     "solidCells": [
-      { "x": 0, "y": 0 },
-      { "x": 0, "y": 1 },
-      { "x": 1, "y": 0 }
+      {
+        "x": 0,
+        "y": 0,
+        "magnitude": 0.0,
+        "sqrMagnitude": 0
+      },
+      {
+        "x": 0,
+        "y": 1,
+        "magnitude": 1.0,
+        "sqrMagnitude": 1
+      },
+      {
+        "x": 1,
+        "y": 0,
+        "magnitude": 1.0,
+        "sqrMagnitude": 1
+      }
     ]
   },
   {
-  "partName": "ThreeWay2x2_Mirrored",
-  "gridWidth": 2,
-  "gridHeight": 2,
-  "displaySprite": "Sprites/Track_ThreeWay2x2_Mirrored.png",
-  "connections": [
-    { "id": 0, "direction": 0, "gridOffset": [1, 0] },
-    { "id": 1, "direction": 2, "gridOffset": [1, 1] },
-    { "id": 2, "direction": 0, "gridOffset": [0, 0] }
-  ],
-  "allowedPathsGroups": [
-    {
-      "allowedPaths": [
-        { "entryConnectionId": 0, "exitConnectionId": 1 },
-        { "entryConnectionId": 1, "exitConnectionId": 0 }
-      ]
-    },
-    {
-      "allowedPaths": [
-        { "entryConnectionId": 2, "exitConnectionId": 1 },
-        { "entryConnectionId": 1, "exitConnectionId": 2 }
-      ]
-    }
-  ],
-  "originalSplineTemplates": [
-    [
-      [1.5, 0.0],
-      [1.5, 2.0]
+    "partName": "ThreeWay2x2_Mirrored",
+    "gridWidth": 2,
+    "gridHeight": 2,
+    "displaySprite": "Sprites/Track_ThreeWay2x2_Mirrored.png",
+    "connections": [
+      {
+        "id": 0,
+        "direction": 0,
+        "gridOffset": [
+          1,
+          0
+        ]
+      },
+      {
+        "id": 1,
+        "direction": 2,
+        "gridOffset": [
+          1,
+          1
+        ]
+      },
+      {
+        "id": 2,
+        "direction": 0,
+        "gridOffset": [
+          0,
+          0
+        ]
+      }
     ],
-    [
-      [0.5, 0.0],
-      [1.5, 2.0]
-    ]
-  ],
-  "splineTemplates": [
-    [
-      [1.5, 0.0],
-      [1.5, 2.0]
+    "allowedPathsGroups": [
+      {
+        "allowedPaths": [
+          {
+            "entryConnectionId": 0,
+            "exitConnectionId": 1,
+            "length": 0.0
+          },
+          {
+            "entryConnectionId": 1,
+            "exitConnectionId": 0,
+            "length": 0.0
+          }
+        ]
+      },
+      {
+        "allowedPaths": [
+          {
+            "entryConnectionId": 2,
+            "exitConnectionId": 1,
+            "length": 0.0
+          },
+          {
+            "entryConnectionId": 1,
+            "exitConnectionId": 2,
+            "length": 0.0
+          }
+        ]
+      }
     ],
-    [
-      [0.5, 0.0],
-      [1.5, 2.0]
+    "originalSplineTemplates": [
+      [
+        [
+          1.5,
+          0.0
+        ],
+        [
+          1.5,
+          2.0
+        ]
+      ],
+      [
+        [
+          0.5,
+          0.0
+        ],
+        [
+          1.5,
+          2.0
+        ]
+      ]
+    ],
+    "splineTemplates": [
+      [
+        [
+          1.5,
+          0.0
+        ],
+        [
+          1.5,
+          2.0
+        ]
+      ],
+      [
+        [
+          0.5,
+          0.0
+        ],
+        [
+          0.7186066,
+          0.748378754
+        ],
+        [
+          1.496875,
+          1.0562501
+        ],
+        [
+          1.5,
+          2.0
+        ]
+      ]
+    ],
+    "solidCells": [
+      {
+        "x": 1,
+        "y": 0,
+        "magnitude": 1.0,
+        "sqrMagnitude": 1
+      },
+      {
+        "x": 1,
+        "y": 1,
+        "magnitude": 1.41421354,
+        "sqrMagnitude": 2
+      },
+      {
+        "x": 0,
+        "y": 0,
+        "magnitude": 0.0,
+        "sqrMagnitude": 0
+      }
     ]
-  ],
-  "solidCells": [
-    { "x": 1, "y": 0 },
-    { "x": 1, "y": 1 },
-    { "x": 0, "y": 0 }
-  ]
-},
+  },
   {
     "partName": "LargeCurveRight3x2",
     "gridWidth": 3,
     "gridHeight": 2,
     "displaySprite": "Sprites/Track_LargeCurveRight3x2.png",
     "connections": [
-      { "id": 0, "direction": 2, "gridOffset": [0, 1] },
-      { "id": 1, "direction": 1, "gridOffset": [2, 0] }
+      {
+        "id": 0,
+        "direction": 2,
+        "gridOffset": [
+          0,
+          1
+        ]
+      },
+      {
+        "id": 1,
+        "direction": 1,
+        "gridOffset": [
+          2,
+          0
+        ]
+      }
     ],
     "allowedPathsGroups": [
       {
         "allowedPaths": [
-          { "entryConnectionId": 0, "exitConnectionId": 1 },
-          { "entryConnectionId": 1, "exitConnectionId": 0 }
+          {
+            "entryConnectionId": 0,
+            "exitConnectionId": 1,
+            "length": 0.0
+          },
+          {
+            "entryConnectionId": 1,
+            "exitConnectionId": 0,
+            "length": 0.0
+          }
         ]
       }
     ],
     "originalSplineTemplates": [
       [
-        [0.5, 2.0],
-        [3.0, 0.5]
+        [
+          0.5,
+          2.0
+        ],
+        [
+          3.0,
+          0.5
+        ]
       ]
     ],
     "splineTemplates": [
       [
-        [0.5, 2.0],
-        [0.818933845, 1.13051462],
-        [1.90853715, 0.6016617],
-        [3.0, 0.5]
+        [
+          0.5,
+          2.0
+        ],
+        [
+          0.818933845,
+          1.13051462
+        ],
+        [
+          1.90853715,
+          0.6016617
+        ],
+        [
+          3.0,
+          0.5
+        ]
       ]
     ],
     "solidCells": [
-      { "x": 0, "y": 0 },
-      { "x": 0, "y": 1 },
-      { "x": 1, "y": 0 },
-      { "x": 1, "y": 1 },
-      { "x": 2, "y": 0 }
+      {
+        "x": 0,
+        "y": 0,
+        "magnitude": 0.0,
+        "sqrMagnitude": 0
+      },
+      {
+        "x": 0,
+        "y": 1,
+        "magnitude": 1.0,
+        "sqrMagnitude": 1
+      },
+      {
+        "x": 1,
+        "y": 0,
+        "magnitude": 1.0,
+        "sqrMagnitude": 1
+      },
+      {
+        "x": 1,
+        "y": 1,
+        "magnitude": 1.41421354,
+        "sqrMagnitude": 2
+      },
+      {
+        "x": 2,
+        "y": 0,
+        "magnitude": 2.0,
+        "sqrMagnitude": 4
+      }
     ]
   },
   {
-  "partName": "LargeCurveRight3x2_Mirrored",
-  "gridWidth": 3,
-  "gridHeight": 2,
-  "displaySprite": "Sprites/Track_LargeCurveRight3x2_Mirrored.png",
-  "connections": [
-    { "id": 0, "direction": 2, "gridOffset": [2, 1] },
-    { "id": 1, "direction": 3, "gridOffset": [0, 0] }
-  ],
-  "allowedPathsGroups": [
-    {
-      "allowedPaths": [
-        { "entryConnectionId": 0, "exitConnectionId": 1 },
-        { "entryConnectionId": 1, "exitConnectionId": 0 }
+    "partName": "LargeCurveRight3x2_Mirrored",
+    "gridWidth": 3,
+    "gridHeight": 2,
+    "displaySprite": "Sprites/Track_LargeCurveRight3x2_Mirrored.png",
+    "connections": [
+      {
+        "id": 0,
+        "direction": 2,
+        "gridOffset": [
+          2,
+          1
+        ]
+      },
+      {
+        "id": 1,
+        "direction": 3,
+        "gridOffset": [
+          0,
+          0
+        ]
+      }
+    ],
+    "allowedPathsGroups": [
+      {
+        "allowedPaths": [
+          {
+            "entryConnectionId": 0,
+            "exitConnectionId": 1,
+            "length": 0.0
+          },
+          {
+            "entryConnectionId": 1,
+            "exitConnectionId": 0,
+            "length": 0.0
+          }
+        ]
+      }
+    ],
+    "originalSplineTemplates": [
+      [
+        [
+          2.5,
+          2.0
+        ],
+        [
+          0.0,
+          0.5
+        ]
       ]
-    }
-  ],
-  "originalSplineTemplates": [
-    [
-      [2.5, 2.0],
-      [0.0, 0.5]
+    ],
+    "splineTemplates": [
+      [
+        [
+          2.5,
+          2.0
+        ],
+        [
+          2.181066,
+          1.13051462
+        ],
+        [
+          1.09146285,
+          0.6016617
+        ],
+        [
+          0.0,
+          0.5
+        ]
+      ]
+    ],
+    "solidCells": [
+      {
+        "x": 2,
+        "y": 0,
+        "magnitude": 2.0,
+        "sqrMagnitude": 4
+      },
+      {
+        "x": 2,
+        "y": 1,
+        "magnitude": 2.236068,
+        "sqrMagnitude": 5
+      },
+      {
+        "x": 1,
+        "y": 0,
+        "magnitude": 1.0,
+        "sqrMagnitude": 1
+      },
+      {
+        "x": 1,
+        "y": 1,
+        "magnitude": 1.41421354,
+        "sqrMagnitude": 2
+      },
+      {
+        "x": 0,
+        "y": 0,
+        "magnitude": 0.0,
+        "sqrMagnitude": 0
+      }
     ]
-  ],
-  "splineTemplates": [
-    [
-      [2.5, 2.0],
-      [2.181066155, 1.13051462],
-      [1.09146285, 0.6016617],
-      [0.0, 0.5]
-    ]
-  ],
-  "solidCells": [
-    { "x": 2, "y": 0 },
-    { "x": 2, "y": 1 },
-    { "x": 1, "y": 0 },
-    { "x": 1, "y": 1 },
-    { "x": 0, "y": 0 }
-  ]
-}
+  }
 ]

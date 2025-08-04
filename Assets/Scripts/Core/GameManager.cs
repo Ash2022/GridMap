@@ -30,6 +30,9 @@ public class GameManager : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
             HandleClick();
+
+        if (Input.GetKeyDown(KeyCode.R))
+            LevelVisualizer.Instance.GenerateDynamic();
     }
 
     private void HandleClick()

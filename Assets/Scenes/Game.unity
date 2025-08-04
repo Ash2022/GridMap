@@ -314,7 +314,39 @@ Transform:
   - {fileID: 1784434352}
   - {fileID: 2127980554}
   - {fileID: 1324158658}
+  - {fileID: 1196068238}
   m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1196068237
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1196068238}
+  m_Layer: 0
+  m_Name: DynamicHolder
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1196068238
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1196068237}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1001080935}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1324158657
 GameObject:
@@ -539,12 +571,13 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 8851ca80e41e0564d99001fa94a34cdf, type: 3}
   - {fileID: 21300000, guid: f84b25dca794f5245a1727a4d96ccece, type: 3}
   - {fileID: 21300000, guid: edebcb435cf9dce499703ed0ac419bb6, type: 3}
-  levelJson: {fileID: 4900000, guid: aa1f8b5c3bab9df418d5e20220e83e56, type: 3}
+  levelJson: {fileID: 4900000, guid: 9d43998df9b013143a3645bbf7625471, type: 3}
   partPrefab: {fileID: 1678834536405887873, guid: 9a1c111077fad0342b1f5d1a8b525097, type: 3}
   stationPrefab: {fileID: 7225796874260481156, guid: 5e9e9912989ad5d4c989134b6a52f358, type: 3}
   trainPrefab: {fileID: 6102414799845618142, guid: cf763bf5645019f4f9fa13aa03ec99c7, type: 3}
   cartPrefab: {fileID: 1267055530054662668, guid: 097eeb02430494341b13e7e653d5eaa3, type: 3}
-  mainHolder: {fileID: 1324158658}
+  levelHolder: {fileID: 1324158658}
+  dynamicHolder: {fileID: 1196068238}
   frameRenderer: {fileID: 2127980555}
   tileDelay: 0.05
   globalPathRenderer: {fileID: 1784434353}

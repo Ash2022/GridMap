@@ -14,7 +14,7 @@ public class LevelVisualizer : MonoBehaviour
     private List<TrackPart> partsLibrary;
     [SerializeField] public List<Sprite> partSprites;  // must match partsLibrary order
 
-    [HideInInspector] private float cellSize;
+    
 
     [Header("Data")]
     [SerializeField] private TextAsset levelJson;
@@ -24,7 +24,8 @@ public class LevelVisualizer : MonoBehaviour
     [SerializeField] private GameObject stationPrefab;
     [SerializeField] private GameObject trainPrefab;
     [SerializeField] private GameObject cartPrefab;
-    [SerializeField] private Transform mainHolder;
+    [SerializeField] private Transform levelHolder;
+    [SerializeField] private Transform dynamicHolder;
 
     [Header("Frame & Build Settings")]
     [SerializeField] private SpriteRenderer frameRenderer;
@@ -39,10 +40,19 @@ public class LevelVisualizer : MonoBehaviour
 
     LevelData currLevel;
 
+    //level dynamic params
+    int minX = int.MaxValue, minY = int.MaxValue, maxX = int.MinValue, maxY = int.MinValue;
+    Vector2 worldOrigin;
+    int gridW;
+    int gridH;
+    [HideInInspector] private float cellSize;
+
     public float CellSize { get => cellSize; set => cellSize = value; }
     public GameObject CartPrefab { get => cartPrefab; set => cartPrefab = value; }
 
     public float MAX_CELL_SIZE = 100;
+
+    
 
     void Awake()
     {
@@ -52,14 +62,15 @@ public class LevelVisualizer : MonoBehaviour
 
     void Start()
     {
-        Build();
+        LoadLevel();
+        BuildCurrLevel();
     }
 
 
     /// <summary>
     /// Call this to (re)build the entire level.
     /// </summary>
-    public void Build()
+    public void LoadLevel()
     {
         var settings = new JsonSerializerSettings
         {
@@ -72,11 +83,9 @@ public class LevelVisualizer : MonoBehaviour
             Formatting = Formatting.Indented
         };
 
-        // clear out any previously spawned parts
-        for (int i = mainHolder.childCount - 1; i >= 0; i--)
-            DestroyImmediate(mainHolder.GetChild(i).gameObject);
+        
 
-        if (levelJson == null || partPrefab == null || mainHolder == null)
+        if (levelJson == null || partPrefab == null || levelHolder == null)
         {
             Debug.LogError("LevelVisualizer: missing references.");
             return;
@@ -97,16 +106,24 @@ public class LevelVisualizer : MonoBehaviour
         {
             Debug.LogWarning("LevelVisualizer: no parts in level.");
             return;
-        }
+        }        
+    }
 
+
+    private void BuildCurrLevel()
+    {
         StartCoroutine(BuildCoroutine(currLevel));
     }
 
     private IEnumerator BuildCoroutine(LevelData level)
     {
+        // clear out any previously spawned parts
+        for (int i = levelHolder.childCount - 1; i >= 0; i--)
+            DestroyImmediate(levelHolder.GetChild(i).gameObject);
+
         // compute grid bounds
 
-        int minX = int.MaxValue, minY = int.MaxValue, maxX = int.MinValue, maxY = int.MinValue;
+
         foreach (var inst in level.parts)
             foreach (var cell in inst.occupyingCells)
             {
@@ -115,30 +132,9 @@ public class LevelVisualizer : MonoBehaviour
                 maxX = Mathf.Max(maxX, cell.x);
                 maxY = Mathf.Max(maxY, cell.y);
             }
-        int gridW = maxX - minX + 1;
-        int gridH = maxY - minY + 1;
-        /*
-        Vector2 worldOrigin;
-        {
-            // use fixed logical frame size
-            float sizeX2 = frameWidthUnits / gridW;
-            float sizeY2 = frameHeightUnits / gridH;
-
-            // pick the larger so we fill (and potentially overflow) one axis
-            cellSize = Mathf.Max(sizeX2, sizeY2);
-
-            cellSize = Mathf.Min(MAX_CELL_SIZE, cellSize);  
-
-            // compute grid's half‑size in world units
-            Vector2 halfGrid = new Vector2(gridW, gridH) * cellSize * 0.5f;
-
-            // assume the frame's center == this.transform.position
-            Vector2 frameCenter = (Vector2)transform.position;
-
-            // origin is bottom‑left of grid: center minus halfGrid, plus half a cell
-            worldOrigin = frameCenter - halfGrid + Vector2.one * (cellSize * 0.5f);
-        }
-        */
+        gridW = maxX - minX + 1;
+        gridH = maxY - minY + 1;
+       
 
         // determine cellSize and worldOrigin so that the grid is centered in the frame
         Bounds fb = frameRenderer.bounds;
@@ -165,7 +161,7 @@ public class LevelVisualizer : MonoBehaviour
         float marginY = (frameH - gridWorldH) * 0.5f;
 
         // worldOrigin is the world position of grid cell (0,0)
-        Vector2 worldOrigin = new Vector2(frameMin.x + marginX,
+        worldOrigin = new Vector2(frameMin.x + marginX,
                                   frameMin.y + marginY);
 
         foreach (var inst in level.parts)
@@ -197,7 +193,7 @@ public class LevelVisualizer : MonoBehaviour
             );
 
             // spawn & orient
-            var go = Instantiate(partPrefab, mainHolder);
+            var go = Instantiate(partPrefab, levelHolder);
             go.name = inst.partId;
             go.transform.position = pos;
             go.transform.rotation = Quaternion.Euler(0f, 0f, -inst.rotation);
@@ -212,7 +208,7 @@ public class LevelVisualizer : MonoBehaviour
 
             yield return new WaitForSeconds(tileDelay);
         }
-
+        /*
         foreach (var pt in level.gameData.points.Where(p => p.type == GamePointType.Station))
         {
             float cellX = pt.gridX - minX + 0.5f;
@@ -224,7 +220,7 @@ public class LevelVisualizer : MonoBehaviour
                 0f
             );
 
-            var go = Instantiate(stationPrefab, mainHolder);
+            var go = Instantiate(stationPrefab, levelHolder);
             go.name = $"Station_{pt.id}";
             go.transform.position = worldPos;
 
@@ -233,7 +229,8 @@ public class LevelVisualizer : MonoBehaviour
             var part = level.parts.FirstOrDefault(p => p.partId == pt.anchor.partId);
             stationView.Initialize(pt, part, cellSize);
         }
-
+        */
+        /*
         foreach (var p in level.gameData.points.Where(x => x.type == GamePointType.Train))
         {
             var trainGO = Instantiate(trainPrefab, mainHolder);
@@ -241,12 +238,59 @@ public class LevelVisualizer : MonoBehaviour
 
             var trainController = trainGO.GetComponent<TrainController>();
             trainController.Init(p, level, worldOrigin,minX,minY, gridH, cellSize, cartPrefab);
-        }
+        }*/
+
         //DrawGlobalSplinePath(level.parts);
 
-        GameManager.Instance.level = level;
 
-        MirrorManager.Instance?.InitFromLevel(level, cellSize);
+        GameManager.Instance.level = currLevel;
+
+        GenerateDynamic();
+        
+    }
+
+
+    public void GenerateDynamic()
+    {
+        ScenarioModel scenarioModel = CloneScenarioModel(currLevel);
+
+        // clear out any previously spawned parts
+        for (int i = dynamicHolder.childCount - 1; i >= 0; i--)
+            DestroyImmediate(dynamicHolder.GetChild(i).gameObject);
+
+        ClearGlobalPathRenderer();
+
+        foreach (var pt in scenarioModel.points.Where(p => p.type == GamePointType.Station))
+        {
+            float cellX = pt.gridX - minX + 0.5f;
+            float cellY = pt.gridY - minY + 0.5f;
+            Vector2 flipped = new Vector2(cellX, gridH - cellY);
+            Vector3 worldPos = new Vector3(
+                worldOrigin.x + flipped.x * cellSize,
+                worldOrigin.y + flipped.y * cellSize,
+                0f
+            );
+
+            var go = Instantiate(stationPrefab, dynamicHolder);
+            go.name = $"Station_{pt.id}";
+            go.transform.position = worldPos;
+
+            var stationView = go.GetComponent<StationView>();
+
+            var part = currLevel.parts.FirstOrDefault(p => p.partId == pt.anchor.partId);
+            stationView.Initialize(pt, part, cellSize);
+        }
+
+        foreach (var p in scenarioModel.points.Where(x => x.type == GamePointType.Train))
+        {
+            var trainGO = Instantiate(trainPrefab, dynamicHolder);
+            trainGO.name = $"Train_{p.id}";
+
+            var trainController = trainGO.GetComponent<TrainController>();
+            trainController.Init(p, currLevel, worldOrigin, minX, minY, gridH, cellSize, cartPrefab);
+        }
+
+        MirrorManager.Instance?.InitFromLevel(currLevel, cellSize);
     }
 
     /// <summary>  
@@ -390,6 +434,10 @@ public class LevelVisualizer : MonoBehaviour
         globalPathRenderer.SetPositions(worldPts.ToArray());
     }
 
+    private void ClearGlobalPathRenderer()
+    {
+        globalPathRenderer.positionCount = 0;
+    }
 
     // maps exitIndex to normalized t along its simple spline
     static float GetExitT(PlacedPartInstance part, int exitIndex)
@@ -445,6 +493,36 @@ public class LevelVisualizer : MonoBehaviour
         var pts = new List<Vector3>();
         DrawGlobalSplinePath(pathModel, pts);
         return pts;
+    }
+
+
+    public static ScenarioModel CloneScenarioModel(LevelData source)
+    {
+        var clone = new ScenarioModel();
+
+        foreach (var point in source.gameData.points)
+        {
+            var newPoint = new GamePoint(
+                point.part,
+                point.gridX,
+                point.gridY,
+                point.type,
+                point.colorIndex,
+                point.anchor
+            );
+
+            newPoint.direction = point.direction;
+
+            if (point.waitingPeople != null)
+                newPoint.waitingPeople = new List<int>(point.waitingPeople);
+
+            if (point.initialCarts != null)
+                newPoint.initialCarts = new List<int>(point.initialCarts);
+
+            clone.points.Add(newPoint);
+        }
+
+        return clone;
     }
 }
 

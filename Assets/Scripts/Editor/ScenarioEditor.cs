@@ -125,7 +125,7 @@ public class ScenarioEditor
 
     public void DrawStationsUI(Rect gridRect, List<GamePoint> points, CellOccupationManager cellManager, Color[] colors, float cellSize)
     {
-        const float panelW = 180f;
+        const float panelW = 480f;
         float rowH = 22f;         // Total height per station (reduced)
         const float labelH = 18f;
         const float personSize = 16f;   // Smaller person icons
@@ -160,8 +160,8 @@ public class ScenarioEditor
                 }
 
                 // Draw people next to the label, wrapping if needed
-                float px = box.x + 4f;
-                float py = box.y + labelH + 2f;
+                float px = box.x + 200f;
+                float py = box.y;// + labelH + 2f;
 
                 for (int j = 0; j < p.waitingPeople.Count; j++)
                 {

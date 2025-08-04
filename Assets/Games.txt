@@ -1,0 +1,6 @@
+
+1. classic Train game, collect passangers to depot - directional trains
+2. color dots - click the train to send it to its depot - do it in the right order
+3. monkey game - travel all the stations - use each path once? (still not implemented)
+4. monkey game #2 - travel all the statsion.
+5.     
