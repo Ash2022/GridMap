@@ -753,6 +753,20 @@ public class TrackLevelEditorWindow : EditorWindow
 
                 levelData.gameData.points = scenarioEditor.GetPoints();
 
+                foreach (PlacedPartInstance partInstance in levelData.parts)
+                {
+                    partInstance.worldSplines = new List<List<Vector3>>();
+
+                    if (partInstance.bakedSplines != null)
+                    {
+                        foreach (var baked in partInstance.bakedSplines)
+                        {
+                            
+                            partInstance.worldSplines.Add(baked.gridPts); // NOTE: Add, not AddRange
+                        }
+                    }
+                }
+
                 
                 File.WriteAllText(path, JsonConvert.SerializeObject(levelData, settings));
                 AssetDatabase.Refresh();

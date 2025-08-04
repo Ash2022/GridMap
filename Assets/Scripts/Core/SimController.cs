@@ -525,4 +525,16 @@ public sealed class SimController
     {
         _world.CommitAdvance(trainId, allowed, out headPos, out headTan);
     }
+
+    //used for the game simulators
+    public void SetLegPolylineByPointId(int gamePointId, List<Vector3> polyline)
+    {
+        int trainId;
+        if (!TryGetTrainIdForPoint(gamePointId, out trainId))
+            throw new ArgumentException("Unknown GamePoint id (train) " + gamePointId);
+
+        // Build a Polyline dto and set it
+        var pl = new Polyline(polyline);
+        _world.SetLegPolyline(trainId, pl);
+    }
 }
