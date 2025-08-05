@@ -235,31 +235,50 @@ namespace RailSimCore
         {
             points = null;
 
-            float defaultHalfCartLen = SimTuning.CartHalfLen(CellSize);
-            // derive base occupied length
-            float occupiedLen = (explicitTrainLengthMeters >= 0f)
-                ? explicitTrainLengthMeters
-                : ((cartOffsets.Count > 0) ? (cartOffsets[cartOffsets.Count - 1] + defaultHalfCartLen)
-                                           : defaultHalfCartLen);
+            // Geometry
+            float halfCart = SimTuning.CartHalfLen(CellSize);
+            float headHalf = SimTuning.HeadHalfLen(CellSize);
 
-            // add safety
-            float backLen = Mathf.Max(0f, occupiedLen + Mathf.Max(0f, safetyGap));
+            // Tail extent measured *behind* the head center
+            float tailBehind = (cartOffsets.Count > 0)
+                ? (cartOffsets[cartOffsets.Count - 1] + halfCart)
+                : headHalf;
+
+            // If explicit length set, use it; otherwise use tailBehind
+            float baseLen = (explicitTrainLengthMeters >= 0f) ? explicitTrainLengthMeters : tailBehind;
+
+            // Total occupied distance *behind* the head (include safety)
+            float backLen = Mathf.Max(0f, baseLen + Mathf.Max(0f, safetyGap));
             if (backLen <= 1e-6f) return false;
 
-            int count = Mathf.Max(2, Mathf.CeilToInt(backLen / Mathf.Max(1e-5f, sampleStep)) + 1);
+            sampleStep = Mathf.Max(1e-5f, sampleStep);
+            int count = Mathf.Max(2, Mathf.CeilToInt(backLen / sampleStep) + 1);
             float step = backLen / (count - 1);
 
-            var pts = new List<Vector3>(count);
-            for (int i = 0; i < count; i++)
+            // Get head pose from TAPE (robust even before a leg is loaded)
+            if (!tape.SampleBack(0f, out var headPos, out var headTan, out _))
+                return false; // no tape yet (should be seeded at spawn)
+
+            var pts = new List<Vector3>(count + 2);
+
+            // Forward "nose" so head-on contact triggers before centers meet
+            float noseLen = headHalf;
+            pts.Add(headPos + headTan * noseLen); // nose tip (ahead of head)
+            pts.Add(headPos);                      // head center
+
+            // Then sample along the back tape
+            for (int i = 1; i < count; i++)
             {
-                float d = i * step;
+                float d = i * step; // distance behind head
                 if (!tape.SampleBack(d, out var p, out _, out _))
-                    return false; // tape/prefix not long enough
+                    return false; // tape/prefix not long enough yet
                 pts.Add(p);
             }
+
             points = pts;
             return true;
         }
+
 
         // ===== Internals =====
 

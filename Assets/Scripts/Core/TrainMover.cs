@@ -77,9 +77,10 @@ public class TrainMover : MonoBehaviour
 
         // Ensure tape capacity at least tail + small margin
         float gap = SimTuning.Gap(cellSize);
-        float lastCenter = (offsets.Count > 0) ? offsets[offsets.Count - 1] : 0f;
-        float capacity = lastCenter + cartHalfLen + gap + SimTuning.TapeMarginMeters;
-        sim.TapeCapacityMeters = capacity;
+        float tailBehind = (offsets.Count > 0)
+            ? (offsets[^1] + cartHalfLen)
+            : headHalfLen; // <-- fallback to head size if no carts
+        sim.TapeCapacityMeters = tailBehind + gap + SimTuning.TapeMarginMeters;
 
         // Fallback seeding (in case controller didn't pre-seed at spawn)
         // Reserve a straight prefix behind start, enough for 'reservedCartSlots'
@@ -306,8 +307,10 @@ public class TrainMover : MonoBehaviour
 
         // ensure tape capacity covers the tail
         float gap = SimTuning.Gap(cellSize);
-        float lastCenter = (offsets.Count > 0) ? offsets[offsets.Count - 1] : 0f;
-        sim.TapeCapacityMeters = lastCenter + SimTuning.CartHalfLen(cellSize) + gap + SimTuning.TapeMarginMeters;
+        float headHalf = SimTuning.HeadHalfLen(cellSize);
+        float cartHalf = SimTuning.CartHalfLen(cellSize);
+        float tailBehind = (offsets.Count > 0) ? (offsets[^1] + cartHalf) : headHalf;
+        sim.TapeCapacityMeters = tailBehind + gap + SimTuning.TapeMarginMeters;
     }
 }
 
