@@ -1,6 +1,228 @@
-
+﻿
 1. classic Train game, collect passangers to depot - directional trains
 2. color dots - click the train to send it to its depot - do it in the right order
 3. monkey game - travel all the stations - use each path once? (still not implemented)
 4. monkey game #2 - travel all the statsion.
 5.     
+
+
+
+Project summary to start new agent:
+
+Project Bootstrap (paste into new chat)
+Goal
+Grid-based train puzzle(s) in Unity. One shared “physics-free” data simulation drives both Game & Editor. Visuals are a thin adapter. We prioritize determinism, debuggability, and reuse across multiple games.
+
+Core Data Concepts
+Grid / World mapping
+
+gridX, gridY are integer cell coords.
+
+cellSize = size of a grid cell in world units.
+
+(minX, minY, gridH, worldOrigin) convert grid → world:
+
+xWorld = worldOrigin.x + (gridX - minX + 0.5f) * cellSize
+
+yWorld = worldOrigin.y + (gridH - (gridY - minY + 0.5f)) * cellSize
+
+Directions (2D)
+
+Up=Vector3.up, Right=Vector3.right, Down=Vector3.down, Left=Vector3.left.
+
+Train head rotates so local +X is forward; visuals scaled in local bounds.
+
+LevelData
+
+parts : List<PlacedPartInstance>
+
+Each part supplies a polyline track: worldSplines : List<List<Vector3>> (world coords).
+
+In Editor, if only baked splines exist, we can save baked→world for simulation.
+
+gameData : ScenarioModel
+
+points : List<GamePoint> (Station, Depot, Train).
+
+Train has direction, initialCarts, and is placed on a straight one-spline part.
+
+Simulation Layer (pure C# / no Unity deps)
+SimTuning (constants/helpers):
+
+HeadLen = cellSize
+
+CartLen = cellSize / 3
+
+Gap = cellSize / 10
+
+HeadHalfLen = cellSize / 2
+
+CartHalfLen = CartLen / 2
+
+SampleStep = cellSize / 8
+
+TapeMarginMeters ≈ 0.1
+
+Eps ≈ 1e-4 * cellSize
+
+SimpleTrainSim (one train):
+
+Inputs per leg: LoadLeg(List<Vector3> worldPoints), SetCartOffsets(IList<float>).
+
+PathTape: records the exact head path back in time. Carts sample positions from tape at fixed offset distances behind the head.
+
+Seeding: at spawn we call SeedTapePrefixStraight(headPos, forward, length) so stationary trains are collidable before they move.
+
+Collision (data-only):
+
+Moving head builds a small polyline “slice” along the path each frame.
+
+Compare against other trains’ occupied slice = forward nose (≈ HeadHalfLen) + last (tail + safety) meters of back tape.
+
+Polyline–polyline intersection (2D) detects both crossings and colinear overlaps.
+
+API highlights:
+
+ComputeAllowedAdvance(wantMeters, others, getId) → { Allowed, Kind: None|Blocked|EndOfPath, BlockerId, HitPos }
+
+CommitAdvance(allowed, out headPos, out headTan)
+
+TryGetBackPose(distance, out pos, out tan)
+
+TryGetOccupiedBackSlice(safetyGap, sampleStep, out pts) — uses forward “nose”
+
+SHead, PathLength, AtEnd() getters.
+
+SimWorld (many trains):
+
+LoadTrack(TrackDto); TrackDto.Segments = Dictionary<TrackSegmentKey, Polyline>.
+
+SpawnTrain(SpawnSpec, TrackSegmentKey?) — creates a SimpleTrainSim.
+
+Step(trainId, meters) → AdvanceResult and writes motion to tape.
+
+RunToNextEvent(trainId, metersPerTick) → SimEvent { Arrived|Blocked, … }.
+
+GetState() snapshot for debug/overlay.
+
+(Optional) consumable segments—removable after arrival at end-of-path.
+
+Unity Game Adapter
+TrainController (scene object):
+
+Builds visuals (head + spawned cart GOs).
+
+Computes cart center offsets (first = headHalf + gap + cartHalf, then + (cartLen + gap) per cart).
+
+Seeds mover/tape at spawn:
+
+Required tape length:
+
+If carts exist: lastOffset + cartHalf + gap + margin
+
+If no carts: use headHalf instead of 0 (important for collision).
+
+On arrival (station): can add a cart:
+
+Compute new center offset; query mover TryGetPoseAtBackDistance(), spawn visual, append offset; update required capacity.
+
+TrainMover (scene object):
+
+Holds SimpleTrainSim and drives the visuals.
+
+On MoveAlongPath(points, carts, cellSize, onCompleted):
+
+Builds offsets from current visuals for continuity.
+
+Configures sim (SampleStep, Eps, safetyGap).
+
+Ensures tape capacity covers tail; if no carts fallback to headHalf.
+
+Starts coroutine:
+
+Each tick: ComputeAllowedAdvance vs other trains’ occupied slices. If Allowed>0 → CommitAdvance and update transforms.
+
+Break on EndOfPath or Blocked.
+
+Reports completion via onCompleted(MoveCompletion { Arrived | Blocked (id, pos) }).
+
+Debug: optional gizmo draw of LastMovingSlice (cyan) & LastBlockedSlice (magenta).
+
+Collision corner-cases handled
+
+Head-on timing fixed by forward “nose” (≈ HeadHalfLen) on occupied slice.
+
+Cartless stationary trains visible by using headHalf in tape seeding and capacity.
+
+First-frame pops avoided by pre-placing carts and seeding tape.
+
+Editor Layer
+ScenarioEditor (places/removes GamePoints; draws UI overlays).
+
+SimController (editor-side façade over SimWorld):
+
+BuildTrackDto(LevelData) from PlacedPartInstance.worldSplines (polyline per spline).
+
+SpawnFromScenario(ScenarioModel, LevelData, grid→world params…) mirrors game spawn math.
+
+StepByPointId, RunToNextEventByPointId, GetStateSnapshot.
+
+Path data in Editor
+
+If worldSplines missing, we save baked→world at level save time so Editor-only tools (e.g., auto-tuner) can simulate without the Game scene.
+
+Mirror (Game↔Sim consistency)
+MirrorManager (optional):
+
+On game spawn: mirror SpawnTrain(...).
+
+On leg start: mirror SetLegPolyline(...).
+
+Each tick: compute sim result with same want and compare with game’s AdvanceResult.
+
+Logs mismatches (different blocker/positions) to help align logic.
+
+Known Pitfalls & Fixes
+Stationary trains not collidable: always seed tape at spawn (straight prefix).
+
+Cartless trains “ghost”: capacity/seed must use headHalf, not cartHalf.
+
+Head-on collisions late: include forward nose in occupied slice.
+
+First frame jerks: pre-place carts aligned to head before first yield.
+
+Index errors early: avoid SampleHead when no leg; sample head from tape at 0.
+
+What the new AI should do
+Respect separation: core sim is pure data, Unity classes just adapt it.
+
+Keep constants via SimTuning (do not hardcode /3, /10, etc.).
+
+Any feature should be testable in Editor via SimController + SimWorld.
+
+When adding collisions/features, think in tape space (distances along head path).
+
+If something looks “off” in Game, cross-check with MirrorManager output first.
+
+Handy snippets (signatures)
+TrainController.MoveAlongPath(List<Vector3> points) → calls TrainMover.MoveAlongPath(points, carts, cellSize, OnMoveCompleted).
+
+TrainMover.TryGetPoseAtBackDistance(float d, out Vector3 pos, out Quaternion rot).
+
+SimpleTrainSim:
+
+LoadLeg(List<Vector3>), SetCartOffsets(IList<float>)
+
+ComputeAllowedAdvance(float want, IList<SimpleTrainSim> others, Func<SimpleTrainSim,int> getId)
+
+CommitAdvance(float allowed, out Vector3 headPos, out Vector3 headTan)
+
+TryGetOccupiedBackSlice(float safetyGap, float sampleStep, out List<Vector3> pts)
+
+Open TODOs (nice-to-haves)
+Consumable segments (remove after traversed).
+
+Station hopping sim (teleport between stations using pathfinder) for single-train, no-collision games.
+
+Auto-tuner/editor tools to evaluate station subsets with target win-rate bands.
+
