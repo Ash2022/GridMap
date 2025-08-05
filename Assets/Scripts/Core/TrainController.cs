@@ -135,12 +135,21 @@ public class TrainController : MonoBehaviour
             currCarts[i].transform.rotation = transform.rotation;
 
         // Tape length requirement (tail offset + small margin)
-        float tailBehind = (currCarts.Count > 0) ? (cartCenterOffsets[^1] + cartHalfLength) : headHalfLength; // <-- engine body when no carts
+        float tailBehind;
+        if (currCarts.Count > 0 && cartCenterOffsets != null && cartCenterOffsets.Count > 0)
+        {
+            int lastIdx = cartCenterOffsets.Count - 1;
+            tailBehind = cartCenterOffsets[lastIdx] + cartHalfLength;
+        }
+        else
+        {
+            tailBehind = headHalfLength; // engine body when no carts
+        }
 
         requiredTapeLength = tailBehind + gap + SimTuning.TapeMarginMeters;
 
         // Seed back tape so this train can be collided with before it ever moves
-                
+
         // make the train collidable BEFORE any movement
         mover.SetInitialCartOffsetsAndCapacity(cartCenterOffsets, currCellSize);
         mover.SeedTapePrefixStraight(transform.position, initialForward, requiredTapeLength, SimTuning.SampleStep(currCellSize));
