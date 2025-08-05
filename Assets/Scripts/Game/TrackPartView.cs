@@ -37,7 +37,9 @@ public class TrackPartView : MonoBehaviour
         //    sprite.bounds.size is (gridWidth, gridHeight) at scale==1
         Vector2 half = sprite.bounds.extents;
 
-        if(model.splines.Count == 1)
+        model.worldSplines = new List<List<Vector3>>();
+
+        if (model.splines.Count == 1)
         {
             Destroy(lineRenderer2);
             model.worldSplines.Add(DrawLocalSpline(model.splines[0], half, lineRenderer1));

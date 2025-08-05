@@ -208,39 +208,7 @@ public class LevelVisualizer : MonoBehaviour
 
             yield return new WaitForSeconds(tileDelay);
         }
-        /*
-        foreach (var pt in level.gameData.points.Where(p => p.type == GamePointType.Station))
-        {
-            float cellX = pt.gridX - minX + 0.5f;
-            float cellY = pt.gridY - minY + 0.5f;
-            Vector2 flipped = new Vector2(cellX, gridH - cellY);
-            Vector3 worldPos = new Vector3(
-                worldOrigin.x + flipped.x * cellSize,
-                worldOrigin.y + flipped.y * cellSize,
-                0f
-            );
-
-            var go = Instantiate(stationPrefab, levelHolder);
-            go.name = $"Station_{pt.id}";
-            go.transform.position = worldPos;
-
-            var stationView = go.GetComponent<StationView>();
-
-            var part = level.parts.FirstOrDefault(p => p.partId == pt.anchor.partId);
-            stationView.Initialize(pt, part, cellSize);
-        }
-        */
-        /*
-        foreach (var p in level.gameData.points.Where(x => x.type == GamePointType.Train))
-        {
-            var trainGO = Instantiate(trainPrefab, mainHolder);
-            trainGO.name = $"Train_{p.id}";
-
-            var trainController = trainGO.GetComponent<TrainController>();
-            trainController.Init(p, level, worldOrigin,minX,minY, gridH, cellSize, cartPrefab);
-        }*/
-
-        //DrawGlobalSplinePath(level.parts);
+       
 
 
         GameManager.Instance.level = currLevel;
