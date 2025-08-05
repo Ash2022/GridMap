@@ -537,4 +537,5 @@ public sealed class SimController
         var pl = new Polyline(polyline);
         _world.SetLegPolyline(trainId, pl);
     }
+
 }
