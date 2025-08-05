@@ -57,7 +57,25 @@ public class AutoTunerWindow : EditorWindow
     private void OnGUI()
     {
         EditorGUILayout.LabelField("Auto Tuner (Single Train)", EditorStyles.boldLabel);
-        levelData = (LevelData)EditorGUILayout.ObjectField("LevelData", levelData, typeof(LevelData), false);
+
+        if (GUILayout.Button("Load Level"))
+        {
+            string path = UnityEditor.EditorUtility.OpenFilePanel(
+                              "Load Level JSON", Application.dataPath, "json");
+            if (!string.IsNullOrEmpty(path))
+            {
+                string json = System.IO.File.ReadAllText(path);
+
+                // Use the same Json settings you use elsewhere
+                var settings = new Newtonsoft.Json.JsonSerializerSettings
+                { TypeNameHandling = Newtonsoft.Json.TypeNameHandling.Auto };
+
+                levelData = Newtonsoft.Json.JsonConvert.DeserializeObject<LevelData>(json, settings);
+
+                Repaint();
+            }
+        }
+
         pathProviderObject = EditorGUILayout.ObjectField("Path Provider", pathProviderObject, typeof(UnityEngine.Object), true);
 
         EditorGUILayout.Space();
@@ -126,7 +144,7 @@ public class AutoTunerWindow : EditorWindow
         try
         {
             // If your SimController has a special editor builder for baked splines, call that here instead.
-            sim.BuildTrackDto(levelData);
+            sim.BuildTrackDtoFromWorld(levelData);
         }
         catch (Exception ex)
         {

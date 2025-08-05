@@ -206,7 +206,7 @@ public sealed class ScenarioAutoTunerRunner
         }
         catch (Exception ex)
         {
-            Debug.LogError("[AutoTuner] Failed to save report: " + ex);
+            UnityEngine.Debug.LogError("[AutoTuner] Failed to save report: " + ex);
         }
     }
 
@@ -316,7 +316,7 @@ public sealed class SingleTrainEvaluator
             if (cancelRequested != null && cancelRequested()) break;
 
             var sc = new SimController();
-            sc.BuildTrackDto(baseLevel);
+            sc.BuildTrackDtoFromWorld(baseLevel);
             // Spawn train
             // Need grid params; for game the LevelVisualizer uses worldOrigin/minX/minY/gridH/cellSize
             // In this evaluator we only need the sim track and the train's head pose/direction just for tape seed.

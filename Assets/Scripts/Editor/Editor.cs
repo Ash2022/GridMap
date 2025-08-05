@@ -1,4 +1,5 @@
 ﻿using EditorUtils;
+using log4net.Core;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ using UnityEditor;
 using UnityEngine;
 using static PlacedPartInstance;
 using static SimController;
+using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 
 
 public class TrackLevelEditorWindow : EditorWindow
@@ -753,19 +755,28 @@ public class TrackLevelEditorWindow : EditorWindow
 
                 levelData.gameData.points = scenarioEditor.GetPoints();
 
-                foreach (PlacedPartInstance partInstance in levelData.parts)
-                {
-                    partInstance.worldSplines = new List<List<Vector3>>();
+                //generate world splines from baked for simulations to be similar to game
 
-                    if (partInstance.bakedSplines != null)
+                int minX = int.MaxValue, minY = int.MaxValue, maxX = int.MinValue, maxY = int.MinValue;
+
+                foreach (var inst in levelData.parts)
+                    foreach (var cell in inst.occupyingCells)
                     {
-                        foreach (var baked in partInstance.bakedSplines)
-                        {
-                            
-                            partInstance.worldSplines.Add(baked.gridPts); // NOTE: Add, not AddRange
-                        }
+                        minX = Mathf.Min(minX, cell.x);
+                        minY = Mathf.Min(minY, cell.y);
+                        maxX = Mathf.Max(maxX, cell.x);
+                        maxY = Mathf.Max(maxY, cell.y);
                     }
-                }
+
+                int gridW = maxX - minX + 1;
+                int gridH = maxY - minY + 1;
+                float sizeX = 9f / gridW;
+                float sizeY = 16f / gridH;
+
+                // pick the *smaller* so that the entire grid fits inside the frame
+                float cellSize = Mathf.Min(sizeX, sizeY, 100);
+
+                BakeSplinesIntoWorld(levelData, minX, minY, gridH, cellSize);
 
                 
                 File.WriteAllText(path, JsonConvert.SerializeObject(levelData, settings));
@@ -797,6 +808,32 @@ public class TrackLevelEditorWindow : EditorWindow
         EditorGUILayout.EndHorizontal();
     }
 
+    void BakeSplinesIntoWorld(LevelData level, int minX, int minY, int gridH, float cellSize)
+    {
+        foreach (var part in level.parts)
+        {
+            part.worldSplines = new List<List<Vector3>>();
+            if (part.bakedSplines == null) continue;
+
+            foreach (var baked in part.bakedSplines)
+            {
+                var gp = baked.gridPts;
+                if (gp == null || gp.Count < 2) continue;
+
+                var poly = new List<Vector3>(gp.Count);
+                for (int i = 0; i < gp.Count; i++)
+                {
+                    float cellX = gp[i].x - minX + 0.5f;
+                    float cellY = gp[i].y - minY + 0.5f;
+                    float wx = cellX * cellSize;                 // origin = 0
+                    float wy = (gridH - cellY) * cellSize;       // flipped Y
+                    poly.Add(new Vector3(wx, wy, 0f));
+                }
+                part.worldSplines.Add(poly);
+            }
+        }
+        // Also do either: save mapping constants OR save per-train head world positions here.
+    }
 
     private void BuildGameGraph()
     {
